@@ -26,10 +26,40 @@ def update_csv_apify():
             writer.writerow(country)
 
 
+jhu_url = 'https://api.covid19api.com/summary'
+
+
+def update_csv_jhu():
+    params = {}
+    data = datacollect.get_json(jhu_url, params)
+    with open('jhu.csv', 'w') as csv_file:
+        field_names = ['Country', 'TotalConfirmed', 'NewConfirmed',
+                       'NewDeaths', 'TotalDeaths', 'NewRecovered', 'TotalRecovered', 'Date']
+        writer = csv.DictWriter(
+            csv_file, fieldnames=field_names, extrasaction='ignore')
+        # write
+        writer.writeheader()
+        for country in data['Countries']:
+            writer.writerow(country)
+    with open('global_jhu.csv', 'w') as csv_file:
+        field_names = ['TotalConfirmed', 'NewConfirmed',
+                       'NewDeaths', 'TotalDeaths', 'NewRecovered', 'TotalRecovered']
+        writer = csv.DictWriter(
+            csv_file, fieldnames=field_names, extrasaction='ignore')
+        # write
+        writer.writeheader()
+
+        writer.writerow(data['Global'])
+
+
 def main():
-    print("update_csv_apify:..")
-    update_csv_apify()
-    print("apify.csv updated successful")
+    # print("update_csv_apify:..")
+    # update_csv_apify()
+    # print("apify.csv updated successful")
+
+    print("update_csv_jhu:..")
+    update_csv_jhu()
+    print("jhu.csv updated successful")
 
 
 if __name__ == '__main__':
