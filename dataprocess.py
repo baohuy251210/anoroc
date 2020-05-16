@@ -34,12 +34,23 @@ def update_csv_jhu():
     data = datacollect.get_json(jhu_url, params)
     with open('jhu.csv', 'w') as csv_file:
         field_names = ['Country', 'TotalConfirmed', 'NewConfirmed',
-                       'NewDeaths', 'TotalDeaths', 'NewRecovered', 'TotalRecovered', 'Date']
+                       'TotalDeaths', 'NewDeaths', 'TotalRecovered', 'NewRecovered']
         writer = csv.DictWriter(
             csv_file, fieldnames=field_names, extrasaction='ignore')
         # write
         writer.writeheader()
         for country in data['Countries']:
+            writer.writerow(country)
+    with open('jhu_sorted.csv', 'w') as csv_file:
+        field_names = ['Country', 'TotalConfirmed', 'NewConfirmed',
+                       'TotalDeaths', 'NewDeaths', 'TotalRecovered', 'NewRecovered']
+        writer = csv.DictWriter(
+            csv_file, fieldnames=field_names, extrasaction='ignore')
+        # write
+        writer.writeheader()
+        sorted_infected = sorted(
+            data['Countries'], reverse=True, key=lambda x: int(x['TotalConfirmed']))
+        for country in sorted_infected:
             writer.writerow(country)
     with open('global_jhu.csv', 'w') as csv_file:
         field_names = ['TotalConfirmed', 'NewConfirmed',
