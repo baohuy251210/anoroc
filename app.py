@@ -27,7 +27,7 @@ def generate_table(dataframe, max_rows=40):
     ])
 
 
-def generate_dropdown
+# def generate_dropdown
 
 '''
 -----------------------
@@ -64,11 +64,6 @@ app.layout = html.Div(
 
         },
         ),
-
-        '''
-        put drop down here
-        '''
-
         generate_table(df),
         html.H6(["Data is sourced from ",
                  html.A('John Hopkins CSSE',
