@@ -58,12 +58,15 @@ def generate_table(dataframe):
             ),
             html.Tbody([
                 html.Tr([
-                    html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
+                    html.Td('+'+str(dataframe.iloc[i][col])) if str(col).startswith('New')
+                    else html.Td(str(dataframe.iloc[i][col]))
+                    for col in dataframe.columns
                 ]) for i in range(len(dataframe))
             ]),
         ], style={
             'marginTop': '3px',
-            'color': 'rgba(0,0,0,0.87)'
+            'color': 'rgba(0,0,0,0.87)',
+
         })
 
 
@@ -117,7 +120,16 @@ app.layout = html.Div(id='container', className='parent',
                               'marginTop': '12px',
                               'textAlign': 'center',
                           }),
-                          generate_table(df),
+
+                          # Full table:
+                          html.Div(generate_table(df), style={
+                              'verticalAlign': 'center',
+                              'margin': '10px auto',
+                              'overflow': 'auto',
+                              'height': '75%',
+                              'width': '75%'
+                          }),
+
 
 
                           html.Footer(["Data is sourced from ",
