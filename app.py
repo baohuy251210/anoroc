@@ -83,6 +83,7 @@ external_stylesheets = [
 app = dash.Dash(__name__,
                 external_stylesheets=external_stylesheets)
 server = app.server
+app.title = 'Anoroc Monitor'
 
 app.layout = html.Div(id='container', className='parent',
                       children=[
@@ -199,3 +200,4 @@ def update_output(value):
 if __name__ == '__main__':
     # Only set False if deploy on heroku:
     app.run_server(debug=True)
+
