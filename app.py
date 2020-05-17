@@ -96,7 +96,6 @@ app.layout = html.Div(
                 style={
             'textAlign': 'center',
             'margin-top': '5px',
-            'font-family': 'Cormorant Garamond',
 
         },
         ),
@@ -130,8 +129,10 @@ app.layout = html.Div(
             'font-style': 'italic',
 
         }
-        ),
-    ])
+        )
+    ], style={
+        'overflow': 'hidden'
+    })
 
 
 @app.callback(
@@ -145,7 +146,9 @@ def update_output(value):
         columns=[{'name': i, 'id': i} for i in newdf.columns],
         style_cell={
             'whitespace': 'normal',
-            'fontSize': 18,
+            'minWidth': '130px', 'width': '130px', 'maxWidth': '130px',
+            'fontSize': 15,
+            'text-align': 'center',
             'color': 'rgba(0,0,0,0.87)',
             'font-family': 'Jost'
         },
