@@ -15,7 +15,7 @@ def update_csv_apify():
     params = {'disableRedirect': True}
     data = datacollect.get_json(apify_url, params)
     # print(json.dumps(data, indent=2))
-    with open('apify.csv', 'w') as csv_file:
+    with open('./data/apify.csv', 'w') as csv_file:
         field_names = ['country', 'infected', 'recovered',
                        'deceased', 'tested', 'lastUpdatedApify']
         writer = csv.DictWriter(
@@ -32,7 +32,7 @@ jhu_url = 'https://api.covid19api.com/summary'
 def update_csv_jhu():
     params = {}
     data = datacollect.get_json(jhu_url, params)
-    with open('jhu.csv', 'w') as csv_file:
+    with open('./data/jhu.csv', 'w') as csv_file:
         field_names = ['Country', 'TotalConfirmed', 'NewConfirmed',
                        'TotalDeaths', 'NewDeaths', 'TotalRecovered', 'NewRecovered']
         writer = csv.DictWriter(
@@ -41,7 +41,7 @@ def update_csv_jhu():
         writer.writeheader()
         for country in data['Countries']:
             writer.writerow(country)
-    with open('jhu_sorted.csv', 'w') as csv_file:
+    with open('./data/jhu_sorted.csv', 'w') as csv_file:
         field_names = ['Country', 'TotalConfirmed', 'NewConfirmed',
                        'TotalDeaths', 'NewDeaths', 'TotalRecovered', 'NewRecovered']
         writer = csv.DictWriter(
@@ -52,7 +52,7 @@ def update_csv_jhu():
             data['Countries'], reverse=True, key=lambda x: int(x['TotalConfirmed']))
         for country in sorted_infected:
             writer.writerow(country)
-    with open('global_jhu.csv', 'w') as csv_file:
+    with open('./data/global_jhu.csv', 'w') as csv_file:
         field_names = ['TotalConfirmed', 'NewConfirmed',
                        'NewDeaths', 'TotalDeaths', 'NewRecovered', 'TotalRecovered']
         writer = csv.DictWriter(

@@ -12,12 +12,12 @@ from dash.dependencies import Input, Output, State
 Data Frame (pandas) to htmlTable
 '''
 
-df = pd.read_csv('jhu_sorted.csv', encoding='cp1252')
+df = pd.read_csv('./data/jhu_sorted.csv', encoding='cp1252')
 df.columns = ['Country', 'Infected', 'New Infected', 'Total Deaths', 'New Deaths',
               'Total Recovered', 'New Recovered']
-df_search = pd.read_csv('jhu.csv', encoding='cp1252')
+df_search = pd.read_csv('./data/jhu.csv', encoding='cp1252')
 df_search_name_index = pd.read_csv(
-    'jhu.csv', index_col='Country', encoding='cp1252')
+    './data/jhu.csv', index_col='Country', encoding='cp1252')
 df_search.columns = ['Country', 'Infected', 'New Infected', 'Total Deaths', 'New Deaths',
                      'Total Recovered', 'New Recovered']
 
