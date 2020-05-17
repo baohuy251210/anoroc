@@ -197,5 +197,5 @@ def update_output(value):
 
 
 if __name__ == '__main__':
-    # Only uncomment if deploy on heroku:
+    # Only set False if deploy on heroku:
     app.run_server(debug=True)
