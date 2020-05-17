@@ -84,7 +84,7 @@ app = dash.Dash(__name__,
 app.layout = html.Div(
     children=[
 
-        html.H1(children='Anoroc COVID-19 Monitor',
+        html.H1(children='ANOROC - Covid19 Monitor',
                 style={
                     'margin-bottom': '5px',
                     'margin-top': '12px',
@@ -152,6 +152,13 @@ def update_output(value):
             'color': 'rgba(0,0,0,0.87)',
             'font-family': 'Jost'
         },
+        style_cell_conditional=[
+            {'if': {'column_id': 'Country'},
+             'width': '23%'},
+            {'if': {'column_id': 'Infected'},
+             'width': '10%'},
+
+        ],
         data=newdf.to_dict('records')
     )
 
