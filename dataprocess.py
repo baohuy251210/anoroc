@@ -7,7 +7,7 @@ import csv
 import numpy as np
 import pandas as pd
 import datacollect
-
+from datetime import datetime
 apify_url = 'https://api.apify.com/v2/key-value-stores/tVaYRsPHLjNdNBu7S/records/LATEST?disableRedirect=true'
 
 
@@ -61,17 +61,6 @@ def update_csv_jhu():
         writer.writeheader()
 
         writer.writerow(data['Global'])
-
-
-def main():
-    # print("update_csv_apify:..")
-    # update_csv_apify()
-    # print("apify.csv updated successful")
-
-    print("update_csv_jhu:..")
-    update_csv_jhu()
     print("jhu.csv updated successful")
+    return datetime.now().strftime('%b %d %Y %H:%M:%S')
 
-
-if __name__ == '__main__':
-    main()

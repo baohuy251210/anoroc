@@ -11,7 +11,7 @@ from dash.dependencies import Input, Output, State
 -----------------------
 Data Frame (pandas) to htmlTable
 '''
-
+data_updated_time = dataprocess.update_csv_jhu()+" CST"
 df = pd.read_csv('./data/jhu_sorted.csv', encoding='cp1252')
 df.columns = ['Country', 'Infected', 'New Infected', 'Total Deaths', 'New Deaths',
               'Total Recovered', 'New Recovered']
@@ -95,13 +95,13 @@ app.layout = html.Div(id='container', className='parent',
                                       'textAlign': 'center'
                                   },
                                   ),
-                          html.H4(children="Updated Daily (" + datetime.today().strftime('%m-%d-%Y')+")",
+                          html.H4(children="Last updated(" + data_updated_time + ")",
                                   style={
-                              'textAlign': 'center',
-                              'marginTop': '5px',
+                                      'textAlign': 'center',
+                                      'marginTop': '5px',
 
-                          },
-                          ),
+                                  },
+                                  ),
                           html.Br(),
                           html.H5('Select Country to Inspect:', style={
                               'textAlign': 'center',
@@ -197,4 +197,5 @@ def update_output(value):
 
 
 if __name__ == '__main__':
+    # Only uncomment if deploy on heroku:
     app.run_server(debug=True)

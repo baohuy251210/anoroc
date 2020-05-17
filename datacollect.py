@@ -16,7 +16,6 @@ def get_json(_url, _params):
     paramdict = _params
     prepped_url = request_url(baseurl, paramdict)
     response = requests.get(prepped_url)
-    print(json.dumps(response.json(), indent=2))  # debug
     return json.loads(response.text, encoding='cp1252')  # return python object
 
 
