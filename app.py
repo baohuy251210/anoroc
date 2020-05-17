@@ -36,16 +36,16 @@ def generate_dropdown(dframe):
         searchable=True,
         value=df.iloc[0][0],
         style={
-            'font-family': 'Jost',
+            'fontFamily': 'Jost',
             'display': 'inline-block',
-            'text-align': 'center',
-            'font-style': 'bold',
+            'textAlign': 'center',
+            'fontStyle': 'bold',
             'margin': '0 auto',
             'color': 'rgba(0,0,0,0.6)',
             'width': '40%',
             'position': 'relative',
-            'vertical-align': 'middle',
-            'font-family': 'Roboto',
+            'verticalAlign': 'middle',
+            # 'fontFamily': 'Roboto',
         }
     )
 
@@ -62,7 +62,7 @@ def generate_table(dataframe):
                 ]) for i in range(len(dataframe))
             ]),
         ], style={
-            'margin-top': '3px',
+            'marginTop': '3px',
             'color': 'rgba(0,0,0,0.87)'
         })
 
@@ -75,64 +75,84 @@ App.py layouts part
 """
 # external_stylesheets = ['https://codepen.io/baohuy251210/pen/KKdGQep.css']
 external_stylesheets = [
-    'https://codepen.io/baohuy251210/pen/rNOqdKv.css']
+    'https://codepen.io/baohuy251210/pen/OJyBYoq.css']
 # external_scripts = ['https://codepen.io/zavoloklom/pen/IGkDz.js']
 app = dash.Dash(__name__,
                 external_stylesheets=external_stylesheets)
 server = app.server
 
-app.layout = html.Div(
-    children=[
+app.layout = html.Div(id='container', className='parent',
+                      children=[
 
-        html.H1(children='ANOROC - Covid19 Monitor',
-                style={
-                    'margin-bottom': '5px',
-                    'margin-top': '12px',
-                    'vertical-align': 'center',
-                    'text-align': 'center'
-                },
-                ),
-        html.H4(children="Updated Daily (" + datetime.today().strftime('%m-%d-%Y')+")",
-                style={
-            'textAlign': 'center',
-            'margin-top': '5px',
+                          html.H1(children='ANOROC - Covid19 Monitor',
+                                  style={
+                                      'marginBottom': '5px',
+                                      'marginTop': '12px',
+                                      'verticalAlign': 'center',
+                                      'textAlign': 'center'
+                                  },
+                                  ),
+                          html.H4(children="Updated Daily (" + datetime.today().strftime('%m-%d-%Y')+")",
+                                  style={
+                              'textAlign': 'center',
+                              'marginTop': '5px',
 
-        },
-        ),
-        html.Br(),
-        html.H5('Select Country to Inspect:', style={
-            'text-align': 'center',
-        }),
-        generate_dropdown(df_search),
-        html.Div(id='dropdown-output',
-                 style={
-                     'font-family': 'Roboto',
-                     'width': '75%',
-                     'text-align': 'center',
-                     'vertical-align': 'center',
-                     'display': 'inline-block'
-                 }),
-        html.H5('Collected Data:', style={
-            'margin-bot': '0px',
-            'margin-top': '12px',
-            'text-align': 'center',
-        }),
-        generate_table(df),
-        html.H6(["Data is sourced from ",
-                 html.A('John Hopkins CSSE',
-                        href='https://github.com/CSSEGISandData/COVID-19'),
-                 html.Br(),
-                 " through a free API from Kyle Redelinghuys ",
-                 html.A('COVID19API', href='covid19api.com')
-                 ],
-                style={
-            'font-style': 'italic',
+                          },
+                          ),
+                          html.Br(),
+                          html.H5('Select Country to Inspect:', style={
+                              'textAlign': 'center',
+                          }),
+                          generate_dropdown(df_search),
+                          html.Div(id='dropdown-output',
+                                   style={
+                                       'fontFamily': 'Roboto',
+                                       'width': '75%',
+                                       'textAlign': 'center',
+                                       'verticalAlign': 'center',
+                                       'display': 'inline-block'
+                                   }),
+                          html.H5('Collected Data:', style={
+                              'marginBottom': '0px',
+                              'marginTop': '12px',
+                              'textAlign': 'center',
+                          }),
+                          generate_table(df),
 
-        }
-        )
-    ], style={
-        'overflow': 'hidden'
-    })
+
+                          html.Footer(["Data is sourced from ",
+                                       html.A('John Hopkins CSSE',
+                                              href='https://github.com/CSSEGISandData/COVID-19'),
+                                       html.Br(),
+                                       " through a free API from Kyle Redelinghuys ",
+                                       html.A('COVID19API',
+                                              href='covid19api.com', style={'marginBottom': '1px solid black'}),
+                                       html.Br(),
+                                       html.H5(["A tracker monitor for COVID-19, Created by ",
+                                                html.A("Github/Anoroc",
+                                                       href='https://github.com/baohuy251210/anoroc', style={'color': '#FFFFFF'}),
+                                                html.Br(),
+                                                "More improvements will be added =]]"
+                                                ]
+                                               )
+
+                                       ],
+                                      style={
+                              #   'fontStyle': 'italic',
+                              'marginTop': '30px',
+                              'color': '#FFFFFF',
+                              'backgroundColor': '#344955'
+                          })
+                      ], style={
+                          'verticalAlign': 'middle',
+                          'textAlign': 'center',
+                          'position': 'absolute',
+                          'width': '100%',
+                          'height': '100%',
+                          'top': '0px',
+                          'left': '0px',
+                      }
+                      )
 
 
 @app.callback(
@@ -148,9 +168,9 @@ def update_output(value):
             'whitespace': 'normal',
             'minWidth': '130px', 'width': '130px', 'maxWidth': '130px',
             'fontSize': 15,
-            'text-align': 'center',
+            'textAlign': 'center',
             'color': 'rgba(0,0,0,0.87)',
-            'font-family': 'Jost'
+            'fontFamily': 'Jost'
         },
         style_cell_conditional=[
             {'if': {'column_id': 'Country'},
