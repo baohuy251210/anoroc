@@ -16,7 +16,7 @@ def get_json(_url, _params):
     paramdict = _params
     prepped_url = request_url(baseurl, paramdict)
     response = requests.get(prepped_url)
-    print("Datacollect.py: ", response.status_code)
+    print("Data Request Status: ", response.status_code)
     try:
         # return python object
         return json.loads(response.text, encoding='cp1252')

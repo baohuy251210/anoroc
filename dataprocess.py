@@ -68,3 +68,22 @@ def update_csv_jhu():
         writer.writerow(data['Global'])
     print("jhu.csv updated successful")
     return datetime.now().strftime('%b %d %Y %H:%M:%S')
+
+
+def retrieve_country_slug():
+    """This function should only be called once 
+    to collect from api the countries and store it into csv as countries and slug
+    """
+    data = datacollect.get_json(jhu_url, {})
+    with open('./data/country_index.csv', 'w') as csv_file:
+        field_names = ['Country', 'Slug']
+        writer = csv.DictWriter(
+            csv_file, fieldnames=field_names, extrasaction='ignore')
+        writer.writeheader()
+        for country in data['Countries']:
+            writer.writerow(country)
+    print("index created")
+
+
+# Code to execute only once:
+# retrieve_country_slug()

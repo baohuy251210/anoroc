@@ -9,17 +9,22 @@ import os
 from dash.dependencies import Input, Output, State
 '''
 -----------------------
-Data Frame (pandas) to htmlTable
+Data Frame (pandas) Stuff
 '''
 data_updated_time = dataprocess.update_csv_jhu()+" MDT"
 df = pd.read_csv('./data/jhu_sorted.csv', encoding='cp1252')
 df.columns = ['Country', 'Infected', 'New Infected', 'Total Deaths', 'New Deaths',
               'Total Recovered', 'New Recovered']
 df_search = pd.read_csv('./data/jhu.csv', encoding='cp1252')
-df_search_name_index = pd.read_csv(
-    './data/jhu.csv', index_col='Country', encoding='cp1252')
 df_search.columns = ['Country', 'Infected', 'New Infected', 'Total Deaths', 'New Deaths',
                      'Total Recovered', 'New Recovered']
+
+dict_slug_index = pd.read_csv(
+    './data/country_index.csv', index_col='Country', encoding='cp1252').to_dict('index')
+'''
+-----------------------
+Dash Core/Html component generators
+'''
 
 
 def generate_dropdown(dframe):
@@ -200,4 +205,3 @@ def update_output(value):
 if __name__ == '__main__':
     # Only set False if deploy on heroku:
     app.run_server(debug=True)
-
