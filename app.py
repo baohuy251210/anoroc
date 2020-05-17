@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime
 import dataprocess
 import dash_table
+import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 '''
 -----------------------
@@ -35,10 +36,15 @@ def generate_dropdown(dframe):
         searchable=True,
         value=df.iloc[0][0],
         style={
+            'font-family': 'Jost',
             'display': 'inline-block',
             'text-align': 'center',
-            'color': '#000000',
-            'width': '75%',
+            'font-style': 'bold',
+            'margin': '0 auto',
+            'color': 'rgba(0,0,0,0.6)',
+            'width': '40%',
+            'position': 'relative',
+            'vertical-align': 'middle',
             'font-family': 'Roboto',
         }
     )
@@ -56,7 +62,8 @@ def generate_table(dataframe):
                 ]) for i in range(len(dataframe))
             ]),
         ], style={
-            'margin-top': '50px',
+            'margin-top': '3px',
+            'color': 'rgba(0,0,0,0.87)'
         })
 
 
@@ -67,7 +74,8 @@ def generate_table(dataframe):
 App.py layouts part
 """
 # external_stylesheets = ['https://codepen.io/baohuy251210/pen/KKdGQep.css']
-external_stylesheets = ['https://codepen.io/baohuy251210/pen/rNOqdKv.css']
+external_stylesheets = [
+    'https://codepen.io/baohuy251210/pen/rNOqdKv.css']
 # external_scripts = ['https://codepen.io/zavoloklom/pen/IGkDz.js']
 app = dash.Dash(__name__,
                 external_stylesheets=external_stylesheets)
@@ -75,29 +83,41 @@ app = dash.Dash(__name__,
 
 app.layout = html.Div(
     children=[
-        html.H1(children='COVID-19 Monitor Dashboard',
+
+        html.H1(children='Anoroc COVID-19 Monitor',
                 style={
-                    'fontWeight': 900,
-                    'font-family': 'Roboto',
                     'margin-bottom': '5px',
-                    'margin-top': '12px'
+                    'margin-top': '12px',
+                    'vertical-align': 'center',
+                    'text-align': 'center'
                 },
                 ),
         html.H4(children="Updated Daily (" + datetime.today().strftime('%m-%d-%Y')+")",
                 style={
             'textAlign': 'center',
             'margin-top': '5px',
+            'font-family': 'Cormorant Garamond',
 
         },
         ),
+        html.Br(),
+        html.H5('Select Country to Inspect:', style={
+            'text-align': 'center',
+        }),
         generate_dropdown(df_search),
         html.Div(id='dropdown-output',
                  style={
                      'font-family': 'Roboto',
                      'width': '75%',
                      'text-align': 'center',
+                     'vertical-align': 'center',
                      'display': 'inline-block'
                  }),
+        html.H5('Collected Data:', style={
+            'margin-bot': '0px',
+            'margin-top': '12px',
+            'text-align': 'center',
+        }),
         generate_table(df),
         html.H6(["Data is sourced from ",
                  html.A('John Hopkins CSSE',
@@ -107,11 +127,10 @@ app.layout = html.Div(
                  html.A('COVID19API', href='covid19api.com')
                  ],
                 style={
-            'font-style': 'italic'
+            'font-style': 'italic',
 
         }
-        )
-
+        ),
     ])
 
 
@@ -125,8 +144,10 @@ def update_output(value):
         id='selected',
         columns=[{'name': i, 'id': i} for i in newdf.columns],
         style_cell={
-            'textOverflow': 'ellipsis',
-            'overflow': 'hidden'
+            'whitespace': 'normal',
+            'fontSize': 18,
+            'color': 'rgba(0,0,0,0.87)',
+            'font-family': 'Jost'
         },
         data=newdf.to_dict('records')
     )
