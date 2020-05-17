@@ -32,6 +32,11 @@ jhu_url = 'https://api.covid19api.com/summary'
 def update_csv_jhu():
     params = {}
     data = datacollect.get_json(jhu_url, params)
+    if (type(data) == str):
+        print("failed connecting to API source, returning cached data...")
+        return "a few hours ago"
+
+    # Get new data successfully
     with open('./data/jhu.csv', 'w') as csv_file:
         field_names = ['Country', 'TotalConfirmed', 'NewConfirmed',
                        'TotalDeaths', 'NewDeaths', 'TotalRecovered', 'NewRecovered']
@@ -63,4 +68,3 @@ def update_csv_jhu():
         writer.writerow(data['Global'])
     print("jhu.csv updated successful")
     return datetime.now().strftime('%b %d %Y %H:%M:%S')
-

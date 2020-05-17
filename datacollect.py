@@ -16,7 +16,11 @@ def get_json(_url, _params):
     paramdict = _params
     prepped_url = request_url(baseurl, paramdict)
     response = requests.get(prepped_url)
-    return json.loads(response.text, encoding='cp1252')  # return python object
+    try:
+        # return python object
+        return json.loads(response.text, encoding='cp1252')
+    except json.decoder.JSONDecodeError:
+        return str(response.status_code)
 
 
 def request_url(baseurl, params={}):
