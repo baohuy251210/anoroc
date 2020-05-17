@@ -122,26 +122,27 @@ app.layout = html.Div(id='container', className='parent',
 
                           html.Footer(["Data is sourced from ",
                                        html.A('John Hopkins CSSE',
-                                              href='https://github.com/CSSEGISandData/COVID-19'),
+                                              href='https://github.com/CSSEGISandData/COVID-19', style={'color': '#ffdc65'}),
                                        html.Br(),
                                        " through a free API from Kyle Redelinghuys ",
                                        html.A('COVID19API',
-                                              href='covid19api.com', style={'marginBottom': '1px solid black'}),
+                                              href='covid19api.com', style={'color': '#ffdc65'}),
                                        html.Br(),
-                                       html.H5(["A tracker monitor for COVID-19, Created by ",
-                                                html.A("Github/Anoroc",
-                                                       href='https://github.com/baohuy251210/anoroc', style={'color': '#FFFFFF'}),
-                                                html.Br(),
-                                                "More improvements will be added =]]"
-                                                ]
-                                               )
+                                       "A tracker monitor for COVID-19, Created by ",
+                                       html.A("baohuy251210@Github/Anoroc",
+                                              href='https://github.com/baohuy251210/anoroc', style={'color': '#ffdc65'}),
+                                       html.Br(),
+                                       "More improvements will be added :)"
+
 
                                        ],
                                       style={
                               #   'fontStyle': 'italic',
                               'marginTop': '30px',
                               'color': '#FFFFFF',
-                              'backgroundColor': '#344955'
+                              'backgroundColor': '#344955',
+                              'fontFamily': 'Roboto Condensed',
+                              'fontWeight': '400'
                           })
                       ], style={
                           'verticalAlign': 'middle',
