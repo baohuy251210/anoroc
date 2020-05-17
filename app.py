@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime
 import dataprocess
 import dash_table
+import os
 from dash.dependencies import Input, Output, State
 '''
 -----------------------
@@ -78,7 +79,7 @@ external_stylesheets = [
 # external_scripts = ['https://codepen.io/zavoloklom/pen/IGkDz.js']
 app = dash.Dash(__name__,
                 external_stylesheets=external_stylesheets)
-
+server = app.server
 
 app.layout = html.Div(
     children=[
