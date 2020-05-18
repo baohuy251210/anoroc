@@ -29,13 +29,18 @@ df_search = pd.read_csv('./data/jhu.csv', encoding='cp1252')
 df_search.columns = ['Country', 'Infected', 'New Infected', 'Total Deaths', 'New Deaths',
                      'Total Recovered', 'New Recovered']
 
+# REBASED Stuffs below:
+
 df_rebased_all = pd.read_csv('./data_rebase/country_all_new_status.csv', encoding='cp1252',
                              keep_default_na=False, na_values=['__'])
 df_rebased_all['last_update'] = pd.to_datetime(df_rebased_all['last_update'])
 df_rebased_all = df_rebased_all.drop(columns='country')
 df_rebased_all.columns = ['Country', 'Infected Cases',
                           'Deaths', 'Total Recovered', 'Last Update (UTC)']
-print(df_rebased_all)
+
+df_country_index = pd.read_csv('./data_rebase/country_alpha_index.csv',
+                               keep_default_na=False, na_values=['__'], encoding='cp1252')
+# print(df_rebased_all)
 '''
 -----------------------
 Dash Core/Html component generators
@@ -54,7 +59,7 @@ def generate_dropdown(dframe):
         placeholder="Select country to inspect",
         clearable=False,
         searchable=True,
-        value=df.iloc[0][0],
+        value=dframe.iloc[-9][0],  # United States of America
         style={
             'fontFamily': 'Jost',
             'display': 'inline-block',
@@ -204,42 +209,7 @@ Handling callbacks:
     Output('dropdown-output', 'children'),
     [Input('country-dropdown', 'value')])
 def update_output(value):
-    newdf = df_search[df_search['Country'] == value]
-    slug_name = dataprocess.index_name_slug(value)
-    countryUrl = './data/countries-total-dayone/{}.csv'.format(slug_name)
-    df_country = pd.read_csv(countryUrl, encoding='cp1252')
-    df_country['Date'] = pd.to_datetime(df_country['Date'])
-
-    # fig = go.Figure([go.Scatter(x=df_country['Date'], y=df_country['Cases'])])
-    fig = px.line(df_country, x='Date', y='Cases', labels={'Date': 'Date',
-                                                           'Cases': 'Total Confirmed Cases'},)
-    fig.update_layout(autosize=True,
-                      font=dict(
-                          family="Jost",
-                          size=15,
-                          color="#000000"
-                      ),
-                      title={
-                          'text': value+": Confirmed Cases Total From Day One",
-                          'y': 0.95,
-                          'x': 0.5,
-                          'xanchor': 'center',
-                          'yanchor': 'top'}
-                      )
-    fig.update_xaxes(rangeslider_visible=True,
-                     rangeselector=dict(
-                         buttons=list([
-                             dict(count=7, label="7d", step="day",
-                                  stepmode="backward"),
-                             dict(count=21, label="3week", step="day",
-                                  stepmode="backward"),
-                             dict(count=1, label="1m", step="month",
-                                  stepmode="backward"),
-                             dict(count=3, label="3m", step="month",
-                                  stepmode="backward"),
-                             dict(step="all")
-                         ])
-                     ))
+    newdf = df_rebased_all[df_rebased_all['Country'] == value]
     # print(df_country['Date'])
     return html.Div([dash_table.DataTable(
         id='selected',
@@ -261,7 +231,7 @@ def update_output(value):
         ],
         data=newdf.to_dict('records')
     ),
-        dcc.Graph(figure=fig, style={'marginTop': '25px'})
+        #     dcc.Graph(figure=fig, style={'marginTop': '25px'})
     ]
     )
 
