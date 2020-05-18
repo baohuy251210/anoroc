@@ -50,7 +50,7 @@ Dash Core/Html component generators
 def generate_dropdown(dframe):
     lst = []
     for i in range(len(dframe)):
-        lst.append({'label': dframe.iloc[i][0],
+        lst.append({'label': dframe.iloc[i][0]+', '+dframe.iloc[i][1],
                     'value': dframe.iloc[i][0]})
     # print(lst)
     return dcc.Dropdown(
@@ -59,7 +59,7 @@ def generate_dropdown(dframe):
         placeholder="Select country to inspect",
         clearable=False,
         searchable=True,
-        value=dframe.iloc[-9][0],  # United States of America
+        value=dframe.iloc[-8][0],  # United States of America
         style={
             'fontFamily': 'Jost',
             'display': 'inline-block',
@@ -130,7 +130,7 @@ app.layout = html.Div(id='container', className='parent',
                           html.H5('Select Country to Inspect:', style={
                               'textAlign': 'center',
                           }),
-                          generate_dropdown(df_search),
+                          generate_dropdown(df_country_index),
                           html.Div(id='dropdown-output',
                                    style={
                                        'marginTop': "10px",
@@ -210,7 +210,61 @@ Handling callbacks:
     [Input('country-dropdown', 'value')])
 def update_output(value):
     newdf = df_rebased_all[df_rebased_all['Country'] == value]
-    # print(df_country['Date'])
+    country_alpha = data_rebase.dict_name_alpha[value]['alpha2']
+    country_url = './data_rebase/country-timeline/{}.csv'.format(country_alpha)
+
+    df_country = pd.read_csv(
+        country_url, encoding='cp1252', keep_default_na=False, na_values=['__'])
+    df_country = df_country.drop(columns='country')
+    df_country['last_update'] = pd.to_datetime(df_country['last_update'])
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(x=df_country['last_update'],
+                             y=df_country['cases'],
+                             mode='lines',
+                             name='Infected'))
+    fig.add_trace(go.Scatter(x=df_country['last_update'],
+                             y=df_country['deaths'],
+                             mode='lines',
+                             name='Deceased'))
+    fig.add_trace(go.Scatter(x=df_country['last_update'],
+                             y=df_country['recovered'],
+                             mode='lines',
+                             name='Recovered'))
+
+    fig.update_layout(title=value+': Reported Infected, Deaths and Recovered',
+                      xaxis_title='Timeline',
+                      yaxis_title='Reported Counts'
+                      )
+    fig.update_layout(autosize=True,
+                      font=dict(
+                          family="Jost",
+                          size=15,
+                          color="#000000"
+                      ),
+                      title={
+                          'y': 0.95,
+                          'x': 0.5,
+                          'xanchor': 'center',
+                          'yanchor': 'top'}
+                      )
+
+    fig.update_xaxes(rangeslider_visible=True,
+                     rangeselector=dict(
+                         buttons=list([
+                             dict(count=7, label="7d", step="day",
+                                  stepmode="backward"),
+                             dict(count=21, label="3week", step="day",
+                                  stepmode="backward"),
+                             dict(count=1, label="1m", step="month",
+                                  stepmode="backward"),
+                             dict(count=3, label="3m", step="month",
+                                  stepmode="backward"),
+                             dict(step="all")
+                         ])
+                     ))
+
     return html.Div([dash_table.DataTable(
         id='selected',
         columns=[{'name': i, 'id': i} for i in newdf.columns],
@@ -231,7 +285,7 @@ def update_output(value):
         ],
         data=newdf.to_dict('records')
     ),
-        #     dcc.Graph(figure=fig, style={'marginTop': '25px'})
+        dcc.Graph(figure=fig, style={'marginTop': '25px'})
     ]
     )
 

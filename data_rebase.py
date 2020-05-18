@@ -46,6 +46,8 @@ def retrieve_country_alpha2():
 
 dict_alpha_name = pd.read_csv('./data_rebase/country_alpha_index.csv',
                               index_col='alpha2', keep_default_na=False, na_values=['__'], encoding='cp1252').to_dict('index')
+dict_name_alpha = pd.read_csv('./data_rebase/country_alpha_index.csv',
+                              index_col='name', keep_default_na=False, na_values=['__'], encoding='cp1252').to_dict('index')
 
 
 def retrieve_all_country_status():
