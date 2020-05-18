@@ -22,7 +22,8 @@ Data Frame (pandas) Stuff
 '''
 
 # ataprocess.update_csv_jhu()+" MDT"
-data_updated_time = data_rebase.update_check()
+data_updated_time = datetime.strptime(
+    data_rebase.update_check(), '%Y-%m-%dT%H:%M:%S')
 
 # REBASED Stuffs below:
 
@@ -122,6 +123,14 @@ app.layout = html.Div(id='container', className='parent',
                                       'marginTop': '2px',
                                   },
                                   ),
+                          html.H6(children="Historical data for graphs is updated daily (not live on that day)",
+                                  style={
+                                      'textAlign': 'right',
+                                      'fontSize': '13px',
+                                      'fontStyle': 'italic',
+                                      'marginBot': '14px',
+                                  },
+                                  ),
                           html.Br(),
                           html.H5('Select Country to Inspect:', style={
                               'textAlign': 'center',
@@ -138,7 +147,7 @@ app.layout = html.Div(id='container', className='parent',
                                        'display': 'inline-block'
                                    }),
 
-                          html.H5('Live Updated Data: '+data_updated_time+'(GMT +0)', style={
+                          html.H5('Live Updated Data: '+str(data_updated_time)+'(GMT +0)', style={
                               'marginBottom': '0px',
                               'fontWeight': '400',
                               'marginTop': '5px',
@@ -164,9 +173,9 @@ app.layout = html.Div(id='container', className='parent',
                                        html.A('John Hopkins CSSE',
                                               href='https://github.com/CSSEGISandData/COVID-19', style={'color': '#ffdc65'}),
                                        html.Br(),
-                                       " through a free API from Kyle Redelinghuys ",
-                                       html.A('COVID19API',
-                                              href='covid19api.com', style={'color': '#ffdc65'}),
+                                       " updated from a free ",
+                                       html.A('COVID19-API',
+                                              href='https://covid19-api.org/', style={'color': '#ffdc65'}),
                                        html.Br(),
                                        "A tracker monitor for COVID-19, Created by ",
                                        html.A("baohuy251210@Github/Anoroc",
