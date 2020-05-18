@@ -93,6 +93,7 @@ def cluster_from_day_one(country_slug, case_status='confirmed'):
     """Function to retrieve data of a country from day one(first confirmed case)
     to current date
     example url: https://api.covid19api.com/total/dayone/country/united-states/status/confirmed
+    dayone (mixed) very confused: https://api.covid19api.com/dayone/country/{}/status/{}
     will return a list of confirmed case (in total) from dayone
     ### Useful keys: "Country", "Cases", "Date", "Status"(confirmed),
     Arguments:
@@ -104,7 +105,7 @@ def cluster_from_day_one(country_slug, case_status='confirmed'):
     if (type(data) == str):
         print("failed connecting to API source, returning cached data...")
         return "Day by day cluster failed"
-    with open('./data/countries/'+country_slug+".csv", 'w') as csv_file:
+    with open('./data/countries-total-dayone/'+country_slug+".csv", 'w') as csv_file:
         field_names = ['Country', 'Cases', 'Date']
         writer = csv.DictWriter(
             csv_file, fieldnames=field_names, extrasaction='ignore')
@@ -112,21 +113,65 @@ def cluster_from_day_one(country_slug, case_status='confirmed'):
         for day in data:
             writer.writerow(day)
     try:
-        return("Retrieve {} from {} to {}".format(country_slug, data[0]['Date'], data[-1]['Date']))
+        return("Retrieve {} from {} to {}".format(country_slug, type(data[0]['Date']), type(data[-1]['Date'])))
     except:
         print(country_slug+" : "+baseurl)
         return(country_slug)
 
 
 def cluster_all_country_dayone():
-    """[summary]
+    """Function calls to execute cluster_from_day_one for all countries
     """
     # country_slug = dict_slug_index['United States of America']['Slug']
     [cluster_from_day_one(dict_slug_index[country_name]['Slug'])
      for country_name in dict_slug_index.keys()]
 
 
-print(cluster_all_country_dayone())
+def process_samedate_to_one(country_slug, case_status='confirmed'):
+    """Function to process data from data/countries 
+    to data/countries-total-dayone
+    for now its australia and china
+    Returns:
+        [type] -- [description]
+    """
+    readUrl = './data/countries/'+country_slug+'.csv'
+    writeUrl = './data/countries-total-dayone/'+country_slug+'.csv'
+    with open(readUrl, 'r') as csv_read, open(writeUrl, 'w') as csv_write:
+        reader = [x for x in list(csv.reader(csv_read)) if len(x) > 0]
+        reader_2 = reader.copy()
+        total = 0
+        processed_lst = []
+        for row in reader:
+            if row[1] != 'Cases':
+                cur_date = row[2]
+                day_total = 0
+                for finder in reader_2:
+                    if finder[1] != 'Cases' and finder[2] == cur_date:
+                        day_total += int(finder[1])
+                # put day-total into dict
+                ndict = {'Country': row[0],
+                         'Cases': day_total, 'Date': cur_date}
+                if ndict not in processed_lst:
+                    processed_lst.append(ndict)
 
+        field_names = ['Country', 'Cases', 'Date']
+        writer = csv.DictWriter(
+            csv_write, fieldnames=field_names, extrasaction='ignore')
+        writer.writeheader()
+        for data in processed_lst:
+            writer.writerow(data)
+            print(data)
+
+
+# ERRORing countries:
+"""
+australia (done)
+china(done)
+For country like australia and china 
+seems like total confirmed to {date} is sum of {cases} within that date
+"""
+# print(cluster_all_country_dayone())
+# print(cluster_from_day_one('australia'))
 # Code to execute only once:
 # retrieve_country_slug()
+# print(process_samedate_to_one('china'))
