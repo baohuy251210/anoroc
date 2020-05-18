@@ -46,8 +46,6 @@ def retrieve_country_alpha2():
 
 dict_alpha_name = pd.read_csv('./data_rebase/country_alpha_index.csv',
                               index_col='alpha2', keep_default_na=False, na_values=['__'], encoding='cp1252').to_dict('index')
-dict_name_alpha = pd.read_csv('./data_rebase/country_alpha_index.csv',
-                              index_col='name', keep_default_na=False, na_values=['__'], encoding='cp1252').to_dict('index')
 
 
 def retrieve_all_country_status():
@@ -61,7 +59,9 @@ def retrieve_all_country_status():
     """
     baseurl = mlcovid_url+'status'
     data = datacollect.get_json(baseurl, {})
-    with open('./data_rebase/country_all_new_status.csv', 'w') as csv_file:
+    url_all_status = './data_rebase/country_all_new_status.csv'
+    url_last_update = './extra/last_update.txt'
+    with open(url_all_status, 'w') as csv_file, open(url_last_update, 'w') as txt_file:
         field_names = ['country', 'name', 'cases',
                        'deaths', 'recovered', 'last_update']
         writer = csv.DictWriter(
@@ -69,7 +69,10 @@ def retrieve_all_country_status():
         writer.writeheader()
         for country in data:
             country['name'] = dict_alpha_name[country['country']]['name']
-            print(country)
+            # print(country)
+            if country['country'] == 'US':
+                txt_file.write(country['last_update'])
+                print("##updated last_update")
             writer.writerow(country)
 
     print("##country_all_new_status retrieved")
@@ -115,7 +118,32 @@ Data Rebaser execution lines (execute only one, offline handling)
 # print(retrieve_country_alpha2()) #made country_alpha_index.csv
 # print(retrieve_all_country_status())  # updated country status all
 
+
+def update_check():
+    """
+    https://covid19-api.org/api/status
+    Retrieve current status ('cases','deaths', 'recovered', 'last_update','country':alpha2)
+    This Function check for US last_update(time) and check whether 
+    the ./extra/last_update.csv matches the live time
+    if not it will retrieve all status for country
+    *data[0] should be US
+
+    Return: string - live time updated from JHU CSSE 
+    """
+
+    baseurl = mlcovid_url+'status'
+    data = datacollect.get_json(baseurl, {})
+    time_live = data[0]['last_update']
+    with open('./extra/last_update.txt', 'r') as txt_file:
+        time_last = txt_file.readlines()[0].strip()
+        if (time_last != time_live):
+            print("##data outdate: Updating...({}->{})".format(time_last, time_live))
+            retrieve_all_country_status()
+        else:
+            print('##data is live and updated '+time_last)
+    return time_live
+
+
 '''
     Helper function for app.py
 '''
-

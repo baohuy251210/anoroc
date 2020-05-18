@@ -20,7 +20,9 @@ Version 0.3 should-be-changelog:
 -----------------------
 Data Frame (pandas) Stuff
 '''
-data_updated_time = 'LIVE'  # ataprocess.update_csv_jhu()+" MDT"
+
+# ataprocess.update_csv_jhu()+" MDT"
+data_updated_time = data_rebase.update_check()
 
 # REBASED Stuffs below:
 
@@ -104,7 +106,7 @@ app.title = 'Anoroc Monitor'
 app.layout = html.Div(id='container', className='parent',
                       children=[
 
-                          html.H1(children='ANOROC - Covid19 Monitor',
+                          html.H1(children='ANOROC - Live Covid19 Monitor',
                                   style={
                                       'marginBottom': '5px',
                                       'marginTop': '12px',
@@ -112,11 +114,12 @@ app.layout = html.Div(id='container', className='parent',
                                       'textAlign': 'center'
                                   },
                                   ),
-                          html.H4(children="Last updated: " + data_updated_time + ".",
+                          html.H6(children="Version 0.3",
                                   style={
-                                      'textAlign': 'center',
-                                      'marginTop': '5px',
-
+                                      'textAlign': 'right',
+                                      'fontSize': '13px',
+                                      'fontStyle': 'italic',
+                                      'marginTop': '2px',
                                   },
                                   ),
                           html.Br(),
@@ -128,20 +131,21 @@ app.layout = html.Div(id='container', className='parent',
                                    style={
                                        'marginTop': "10px",
                                        'fontFamily': 'Roboto',
-                                       'width': '75%',
+                                       'width': '90%',
                                        'overflow': 'auto',
                                        'textAlign': 'center',
                                        'verticalAlign': 'center',
                                        'display': 'inline-block'
                                    }),
 
-                          html.H5('Collected Data:', style={
+                          html.H5('Live Updated Data: '+data_updated_time+'(GMT +0)', style={
                               'marginBottom': '0px',
-                              'fontWeight': '600',
+                              'fontWeight': '400',
                               'marginTop': '5px',
-                              'border-top-left-radius': '6px',
-                              'border-top-right-radius': '6px',
-                              'borderTop': '5px solid #5f7481',
+                              'fontFamily': 'Jost',
+                              #   'border-top-left-radius': '6px',
+                              #   'border-top-right-radius': '6px',
+                              'borderTop': '2px solid #5f7481',
                               'textAlign': 'center',
                           }),
 
@@ -181,6 +185,7 @@ app.layout = html.Div(id='container', className='parent',
                               'fontWeight': '400'
                           })
                       ], style={
+                          'borderTop': '20px solid #0b222c',
                           'verticalAlign': 'middle',
                           'textAlign': 'center',
                           'position': 'absolute',
@@ -202,8 +207,43 @@ Handling callbacks:
     Output('dropdown-output', 'children'),
     [Input('country-dropdown', 'value')])
 def update_output(value):
-    newdf = df_rebased_all[df_rebased_all['Country'] == value]
-    country_alpha = data_rebase.dict_name_alpha[value]['alpha2']
+    newdf = df_rebased_all[df_rebased_all['Country'] == value].astype(str)
+    fig = fig_line_chart(value)
+
+    return html.Div([dash_table.DataTable(
+        id='selected',
+        columns=[{'name': i, 'id': i} for i in newdf.columns],
+        style_cell={
+            'whitespace': 'normal',
+            'minWidth': '130px', 'width': '130px', 'maxWidth': '130px',
+            'fontSize': 15,
+            'textAlign': 'center',
+            'color': 'rgba(0,0,0,0.87)',
+            'fontFamily': 'Jost'
+        },
+        style_cell_conditional=[
+            {'if': {'column_id': 'Country'},
+             'width': '23%'},
+            {'if': {'column_id': 'Infected'},
+             'width': '10%'},
+
+        ],
+        data=newdf.to_dict('records')
+    ),
+        dcc.Graph(figure=fig, style={'marginTop': '25px', 'width': '50%'})
+    ]
+    )
+
+
+'''
+Helper Function to generate figures 
+'''
+
+
+def fig_line_chart(value):
+    dict_name_alpha = pd.read_csv('./data_rebase/country_alpha_index.csv',
+                                  index_col='name', keep_default_na=False, na_values=['__'], encoding='cp1252').to_dict('index')
+    country_alpha = dict_name_alpha[value]['alpha2']
     country_url = './data_rebase/country-timeline/{}.csv'.format(country_alpha)
 
     df_country = pd.read_csv(
@@ -257,30 +297,7 @@ def update_output(value):
                              dict(step="all")
                          ])
                      ))
-
-    return html.Div([dash_table.DataTable(
-        id='selected',
-        columns=[{'name': i, 'id': i} for i in newdf.columns],
-        style_cell={
-            'whitespace': 'normal',
-            'minWidth': '130px', 'width': '130px', 'maxWidth': '130px',
-            'fontSize': 15,
-            'textAlign': 'center',
-            'color': 'rgba(0,0,0,0.87)',
-            'fontFamily': 'Jost'
-        },
-        style_cell_conditional=[
-            {'if': {'column_id': 'Country'},
-             'width': '23%'},
-            {'if': {'column_id': 'Infected'},
-             'width': '10%'},
-
-        ],
-        data=newdf.to_dict('records')
-    ),
-        dcc.Graph(figure=fig, style={'marginTop': '25px'})
-    ]
-    )
+    return fig
 
 
 if __name__ == '__main__':
