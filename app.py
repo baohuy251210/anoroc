@@ -256,4 +256,4 @@ def update_output(value):
 
 if __name__ == '__main__':
     # Only set False if deploy on heroku:
-    app.run_server(debug=True)
+    app.run_server(debug=False)
