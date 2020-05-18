@@ -1,3 +1,5 @@
+import plotly.express as px
+import plotly.graph_objects as go
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -125,7 +127,9 @@ app.layout = html.Div(id='container', className='parent',
 
                           html.H5('Collected Data:', style={
                               'marginBottom': '0px',
-                              'marginTop': '12px',
+                              'fontWeight': '600',
+                              'marginTop': '5px',
+                              'border-top': '4px solid #5f7481',
                               'textAlign': 'center',
                           }),
 
@@ -191,6 +195,37 @@ def update_output(value):
     countryUrl = './data/countries-total-dayone/{}.csv'.format(slug_name)
     df_country = pd.read_csv(countryUrl, encoding='cp1252')
     df_country['Date'] = pd.to_datetime(df_country['Date'])
+
+    # fig = go.Figure([go.Scatter(x=df_country['Date'], y=df_country['Cases'])])
+    fig = px.line(df_country, x='Date', y='Cases', labels={'Date': 'Date',
+                                                           'Cases': 'Total Confirmed Cases'},)
+    fig.update_layout(autosize=True,
+                      font=dict(
+                          family="Jost",
+                          size=15,
+                          color="#000000"
+                      ),
+                      title={
+                          'text': value+": Confirmed Cases Total From Day One",
+                          'y': 0.95,
+                          'x': 0.5,
+                          'xanchor': 'center',
+                          'yanchor': 'top'}
+                      )
+    fig.update_xaxes(rangeslider_visible=True,
+                     rangeselector=dict(
+                         buttons=list([
+                             dict(count=7, label="7d", step="day",
+                                  stepmode="backward"),
+                             dict(count=21, label="3week", step="day",
+                                  stepmode="backward"),
+                             dict(count=1, label="1m", step="month",
+                                  stepmode="backward"),
+                             dict(count=3, label="3m", step="month",
+                                  stepmode="backward"),
+                             dict(step="all")
+                         ])
+                     ))
     # print(df_country['Date'])
     return html.Div([dash_table.DataTable(
         id='selected',
@@ -211,7 +246,9 @@ def update_output(value):
 
         ],
         data=newdf.to_dict('records')
-    ), html.Label("selected " + slug_name, style={"marginTop": "50px"})]
+    ),
+        dcc.Graph(figure=fig, style={'marginTop': '25px'})
+    ]
     )
 
 
