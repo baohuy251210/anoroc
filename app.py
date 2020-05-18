@@ -5,7 +5,6 @@ import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 from datetime import datetime
-import dataprocess
 import dash_table
 import data_rebase
 import os
@@ -21,13 +20,7 @@ Version 0.3 should-be-changelog:
 -----------------------
 Data Frame (pandas) Stuff
 '''
-data_updated_time = 'mdt'  # ataprocess.update_csv_jhu()+" MDT"
-df = pd.read_csv('./data/jhu_sorted.csv', encoding='cp1252')
-df.columns = ['Country', 'Infected', 'New Infected', 'Total Deaths', 'New Deaths',
-              'Total Recovered', 'New Recovered']
-df_search = pd.read_csv('./data/jhu.csv', encoding='cp1252')
-df_search.columns = ['Country', 'Infected', 'New Infected', 'Total Deaths', 'New Deaths',
-                     'Total Recovered', 'New Recovered']
+data_updated_time = 'LIVE'  # ataprocess.update_csv_jhu()+" MDT"
 
 # REBASED Stuffs below:
 
