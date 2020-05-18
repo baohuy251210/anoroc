@@ -19,8 +19,7 @@ df_search = pd.read_csv('./data/jhu.csv', encoding='cp1252')
 df_search.columns = ['Country', 'Infected', 'New Infected', 'Total Deaths', 'New Deaths',
                      'Total Recovered', 'New Recovered']
 
-dict_slug_index = pd.read_csv(
-    './data/country_index.csv', index_col='Country', encoding='cp1252').to_dict('index')
+
 '''
 -----------------------
 Dash Core/Html component generators

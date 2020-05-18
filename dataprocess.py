@@ -1,5 +1,5 @@
 """
-dataprocess makes use of datacollect.py 
+dataprocess makes use of datacollect.py
 and turn json collected to csv file.
 """
 import json
@@ -71,7 +71,7 @@ def update_csv_jhu():
 
 
 def retrieve_country_slug():
-    """This function should only be called once 
+    """This function should only be called once
     to collect from api the countries and store it into csv as countries and slug
     """
     data = datacollect.get_json(jhu_url, {})
@@ -84,6 +84,49 @@ def retrieve_country_slug():
             writer.writerow(country)
     print("index created")
 
+
+dict_slug_index = pd.read_csv(
+    './data/country_index.csv', index_col='Country', encoding='cp1252').to_dict('index')
+
+
+def cluster_from_day_one(country_slug, case_status='confirmed'):
+    """Function to retrieve data of a country from day one(first confirmed case)
+    to current date
+    example url: https://api.covid19api.com/total/dayone/country/united-states/status/confirmed
+    will return a list of confirmed case (in total) from dayone
+    ### Useful keys: "Country", "Cases", "Date", "Status"(confirmed),
+    Arguments:
+    country_slug str - must be a country's slug from country_index.csv
+    """
+    baseurl = "https://api.covid19api.com/total/dayone/country/{}/status/{}".format(
+        country_slug, case_status)
+    data = datacollect.get_json(baseurl, {})
+    if (type(data) == str):
+        print("failed connecting to API source, returning cached data...")
+        return "Day by day cluster failed"
+    with open('./data/countries/'+country_slug+".csv", 'w') as csv_file:
+        field_names = ['Country', 'Cases', 'Date']
+        writer = csv.DictWriter(
+            csv_file, fieldnames=field_names, extrasaction='ignore')
+        writer.writeheader()
+        for day in data:
+            writer.writerow(day)
+    try:
+        return("Retrieve {} from {} to {}".format(country_slug, data[0]['Date'], data[-1]['Date']))
+    except:
+        print(country_slug+" : "+baseurl)
+        return(country_slug)
+
+
+def cluster_all_country_dayone():
+    """[summary]
+    """
+    # country_slug = dict_slug_index['United States of America']['Slug']
+    [cluster_from_day_one(dict_slug_index[country_name]['Slug'])
+     for country_name in dict_slug_index.keys()]
+
+
+print(cluster_all_country_dayone())
 
 # Code to execute only once:
 # retrieve_country_slug()
