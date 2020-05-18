@@ -1,6 +1,12 @@
 """
-dataprocess makes use of datacollect.py
-and turn json collected to csv file.
+Version 0.3: I decided to change the base API from covid19api.com to
+covid19-api.org
+They have prediction for 2 weeks and also much more updated and sorted 
+data.
+postman documentation: 
+https://documenter.getpostman.com/view/10877427/SzYW2f8n?version=latest#e56a91bb-7d30-47bf-bfc5-3666397c4813
+
+
 """
 import json
 import csv
@@ -8,82 +14,77 @@ import numpy as np
 import pandas as pd
 import datacollect
 from datetime import datetime
-apify_url = 'https://api.apify.com/v2/key-value-stores/tVaYRsPHLjNdNBu7S/records/LATEST?disableRedirect=true'
 
 
-def update_csv_apify():
-    params = {'disableRedirect': True}
-    data = datacollect.get_json(apify_url, params)
-    # print(json.dumps(data, indent=2))
-    with open('./data/apify.csv', 'w') as csv_file:
-        field_names = ['country', 'infected', 'recovered',
-                       'deceased', 'tested', 'lastUpdatedApify']
+"""
+    https://covid19-api.org/api/country/:country #get countries 
+    --Focus on "name" and "alpha2"
+    ---"name": official name?
+    ---"alpha2": country code also param for country in this api
+"""
+
+mlcovid_url = 'https://covid19-api.org/api/'
+
+
+def retrieve_country_alpha2():
+    """This function should only be called once
+    to collect from api the countries and store it into csv as countries and alpha2
+    https://covid19-api.org/api/countries
+    returns a list of dicts, each dict has "name" and "alpha2" to get
+    """
+    baseurl = mlcovid_url+'countries'
+    data = datacollect.get_json(baseurl, {})
+    with open('./data_rebase/country_alpha_index.csv', 'w') as csv_file:
+        field_names = ['name', 'alpha2']
         writer = csv.DictWriter(
             csv_file, fieldnames=field_names, extrasaction='ignore')
-        # write
         writer.writeheader()
         for country in data:
             writer.writerow(country)
+    print("##country_alpha_index created")
 
 
-jhu_url = 'https://api.covid19api.com/summary'
-
-
-def update_csv_jhu():
-    params = {}
-    data = datacollect.get_json(jhu_url, params)
-    if (type(data) == str):
-        print("failed connecting to API source, returning cached data...")
-        return "a few hours ago"
-
-    # Get new data successfully
-    with open('./data/jhu.csv', 'w') as csv_file:
-        field_names = ['Country', 'TotalConfirmed', 'NewConfirmed',
-                       'TotalDeaths', 'NewDeaths', 'TotalRecovered', 'NewRecovered']
-        writer = csv.DictWriter(
-            csv_file, fieldnames=field_names, extrasaction='ignore')
-        # write
-        writer.writeheader()
-        for country in data['Countries']:
-            writer.writerow(country)
-    with open('./data/jhu_sorted.csv', 'w') as csv_file:
-        field_names = ['Country', 'TotalConfirmed', 'NewConfirmed',
-                       'TotalDeaths', 'NewDeaths', 'TotalRecovered', 'NewRecovered']
-        writer = csv.DictWriter(
-            csv_file, fieldnames=field_names, extrasaction='ignore')
-        # write
-        writer.writeheader()
-        sorted_infected = sorted(
-            data['Countries'], reverse=True, key=lambda x: int(x['TotalConfirmed']))
-        for country in sorted_infected:
-            writer.writerow(country)
-    with open('./data/global_jhu.csv', 'w') as csv_file:
-        field_names = ['TotalConfirmed', 'NewConfirmed',
-                       'NewDeaths', 'TotalDeaths', 'NewRecovered', 'TotalRecovered']
-        writer = csv.DictWriter(
-            csv_file, fieldnames=field_names, extrasaction='ignore')
-        # write
-        writer.writeheader()
-
-        writer.writerow(data['Global'])
-    print("jhu.csv updated successful")
-    return datetime.now().strftime('%b %d %Y %H:%M:%S')
-
-
-def retrieve_country_slug():
-    """This function should only be called once
-    to collect from api the countries and store it into csv as countries and slug
+def retrieve_all_country_status():
+    """Retrieve current status ('cases','deaths', 'recovered', 'last_update','country':alpha2)
+    to make live table (live updated from jhu csse)
+    https://covid19-api.org/api/status
+    returns a list of dicts [{}, {},....]
+    each has country alpha2 and live status  
+    Returns:
+        [type] -- [description]
     """
-    data = datacollect.get_json(jhu_url, {})
-    with open('./data/country_index.csv', 'w') as csv_file:
-        field_names = ['Country', 'Slug']
+    baseurl = mlcovid_url+'status'
+    dict_alpha_name = pd.read_csv('./data_rebase/country_alpha_index.csv',
+                                  index_col='alpha2', keep_default_na=False, na_values=['__'], encoding='cp1252').to_dict('index')
+    data = datacollect.get_json(baseurl, {})
+    with open('./data_rebase/country_all_new_status.csv', 'w') as csv_file:
+        field_names = ['country', 'name', 'cases',
+                       'deaths', 'recovered', 'last_updated']
         writer = csv.DictWriter(
             csv_file, fieldnames=field_names, extrasaction='ignore')
         writer.writeheader()
-        for country in data['Countries']:
+        for country in data:
+            country['name'] = dict_alpha_name[country['country']]['name']
+            print(country)
             writer.writerow(country)
-    print("index created")
 
+    print("##country_all_new_status retrieved")
+
+
+'''
+Data Rebaser execution lines (execute only one, offline handling)
+'''
+# print(retrieve_country_alpha2()) #made country_alpha_index.csv
+print(retrieve_all_country_status())  # updated country status all
+
+'''
+    Helper function for app.py
+'''
+
+
+'''
+(old) data process
+'''
 
 dict_slug_index = pd.read_csv(
     './data/country_index.csv', index_col='Country', encoding='cp1252').to_dict('index')
