@@ -190,7 +190,8 @@ def update_output(value):
     slug_name = dataprocess.index_name_slug(value)
     countryUrl = './data/countries-total-dayone/{}.csv'.format(slug_name)
     df_country = pd.read_csv(countryUrl, encoding='cp1252')
-    print(df_country)
+    df_country['Date'] = pd.to_datetime(df_country['Date'])
+    # print(df_country['Date'])
     return html.Div([dash_table.DataTable(
         id='selected',
         columns=[{'name': i, 'id': i} for i in newdf.columns],
