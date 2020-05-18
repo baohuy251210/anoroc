@@ -10,6 +10,12 @@ import dash_table
 import os
 from dash.dependencies import Input, Output, State
 '''
+Version 0.3 should-be-changelog:
+    -readme.md
+    -updated data 5/18/2020 Mountain Daylight Time
+'''
+
+'''
 -----------------------
 Data Frame (pandas) Stuff
 '''
