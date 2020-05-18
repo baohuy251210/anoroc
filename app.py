@@ -114,12 +114,15 @@ app.layout = html.Div(id='container', className='parent',
                           generate_dropdown(df_search),
                           html.Div(id='dropdown-output',
                                    style={
+                                       'marginTop': "10px",
                                        'fontFamily': 'Roboto',
                                        'width': '75%',
+                                       'overflow': 'auto',
                                        'textAlign': 'center',
                                        'verticalAlign': 'center',
                                        'display': 'inline-block'
                                    }),
+
                           html.H5('Collected Data:', style={
                               'marginBottom': '0px',
                               'marginTop': '12px',
@@ -173,13 +176,22 @@ app.layout = html.Div(id='container', className='parent',
                       )
 
 
+'''
+---------------
+Handling callbacks:
+'''
+
+
 @app.callback(
     Output('dropdown-output', 'children'),
     [Input('country-dropdown', 'value')])
 def update_output(value):
     newdf = df_search[df_search['Country'] == value]
-
-    return dash_table.DataTable(
+    slug_name = dataprocess.index_name_slug(value)
+    countryUrl = './data/countries-total-dayone/{}.csv'.format(slug_name)
+    df_country = pd.read_csv(countryUrl, encoding='cp1252')
+    print(df_country)
+    return html.Div([dash_table.DataTable(
         id='selected',
         columns=[{'name': i, 'id': i} for i in newdf.columns],
         style_cell={
@@ -198,6 +210,7 @@ def update_output(value):
 
         ],
         data=newdf.to_dict('records')
+    ), html.Label("selected " + slug_name, style={"marginTop": "50px"})]
     )
 
 

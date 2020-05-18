@@ -89,6 +89,18 @@ dict_slug_index = pd.read_csv(
     './data/country_index.csv', index_col='Country', encoding='cp1252').to_dict('index')
 
 
+def index_name_slug(country_name):
+    """Takes country name and 
+    return country's slug (short name)
+    Arguments:
+        country_name {string} -- [Country Name]
+
+    Returns:
+        [string] -- [slug name]
+    """
+    return dict_slug_index[country_name]['Slug']
+
+
 def cluster_from_day_one(country_slug, case_status='confirmed'):
     """Function to retrieve data of a country from day one(first confirmed case)
     to current date
