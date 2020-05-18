@@ -7,6 +7,7 @@ import pandas as pd
 from datetime import datetime
 import dataprocess
 import dash_table
+import data_rebase
 import os
 from dash.dependencies import Input, Output, State
 '''
@@ -20,7 +21,7 @@ Version 0.3 should-be-changelog:
 -----------------------
 Data Frame (pandas) Stuff
 '''
-data_updated_time = dataprocess.update_csv_jhu()+" MDT"
+data_updated_time = 'mdt'  # ataprocess.update_csv_jhu()+" MDT"
 df = pd.read_csv('./data/jhu_sorted.csv', encoding='cp1252')
 df.columns = ['Country', 'Infected', 'New Infected', 'Total Deaths', 'New Deaths',
               'Total Recovered', 'New Recovered']
@@ -28,7 +29,13 @@ df_search = pd.read_csv('./data/jhu.csv', encoding='cp1252')
 df_search.columns = ['Country', 'Infected', 'New Infected', 'Total Deaths', 'New Deaths',
                      'Total Recovered', 'New Recovered']
 
-
+df_rebased_all = pd.read_csv('./data_rebase/country_all_new_status.csv', encoding='cp1252',
+                             keep_default_na=False, na_values=['__'])
+df_rebased_all['last_update'] = pd.to_datetime(df_rebased_all['last_update'])
+df_rebased_all = df_rebased_all.drop(columns='country')
+df_rebased_all.columns = ['Country', 'Infected Cases',
+                          'Deaths', 'Total Recovered', 'Last Update (UTC)']
+print(df_rebased_all)
 '''
 -----------------------
 Dash Core/Html component generators
@@ -71,9 +78,7 @@ def generate_table(dataframe):
             ),
             html.Tbody([
                 html.Tr([
-                    html.Td('+'+str(dataframe.iloc[i][col])) if str(col).startswith('New')
-                    else html.Td(str(dataframe.iloc[i][col]))
-                    for col in dataframe.columns
+                    html.Td(str(dataframe.iloc[i][col])) for col in dataframe.columns
                 ]) for i in range(len(dataframe))
             ]),
         ], style={
@@ -143,7 +148,7 @@ app.layout = html.Div(id='container', className='parent',
                           }),
 
                           # Full table:
-                          html.Div(generate_table(df), style={
+                          html.Div(generate_table(df_rebased_all), style={
                               'verticalAlign': 'center',
                               'margin': '10px auto',
                               'overflow': 'auto',
@@ -263,4 +268,4 @@ def update_output(value):
 
 if __name__ == '__main__':
     # Only set False if deploy on heroku:
-    app.run_server(debug=False)
+    app.run_server(debug=True)

@@ -59,7 +59,7 @@ def retrieve_all_country_status():
     data = datacollect.get_json(baseurl, {})
     with open('./data_rebase/country_all_new_status.csv', 'w') as csv_file:
         field_names = ['country', 'name', 'cases',
-                       'deaths', 'recovered', 'last_updated']
+                       'deaths', 'recovered', 'last_update']
         writer = csv.DictWriter(
             csv_file, fieldnames=field_names, extrasaction='ignore')
         writer.writeheader()
@@ -75,7 +75,7 @@ def retrieve_all_country_status():
 Data Rebaser execution lines (execute only one, offline handling)
 '''
 # print(retrieve_country_alpha2()) #made country_alpha_index.csv
-print(retrieve_all_country_status())  # updated country status all
+# print(retrieve_all_country_status())  # updated country status all
 
 '''
     Helper function for app.py
