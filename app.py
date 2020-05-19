@@ -25,10 +25,8 @@ Data Frame (pandas) Stuff
 '''
 
 # ataprocess.update_csv_jhu()+" MDT"
-data_updated_time = "version test"
-# data_updated_time = datetime.datetime.strptime(
-# data_rebase.update_check(), '%Y-%m-%dT%H:%M:%S')
-
+# data_updated_time = "version test"
+data_updated_time = data_rebase.update_check()
 # REBASED Stuffs below:
 
 df_rebased_all = pd.read_csv('./data_rebase/country_all_new_status.csv', encoding='utf-8',
@@ -116,6 +114,15 @@ app.layout = html.Div(id='container', className='parent',
                                       'textAlign': 'center'
                                   },
                                   ),
+                          html.H6(['last updated from anoroc: '+str(data_updated_time)+'(GMT +0)'],
+                                  style={
+                              'textAlign': 'right',
+                                      'fontSize': '13px',
+                                      'fontFamily': 'Arvo',
+                                      'fontStyle': 'italic',
+                                      'marginTop': '1px',
+                                      'paddingRight': '250px',
+                          }),
                           html.H6([html.A("Version 0.3 Changelog", href='https://github.com/baohuy251210/anoroc')],
                                   style={
                                       'textAlign': 'right',

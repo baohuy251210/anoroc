@@ -13,7 +13,7 @@ import csv
 import numpy as np
 import pandas as pd
 import datacollect
-from datetime import datetime
+import datetime
 
 
 """
@@ -135,6 +135,7 @@ def update_check():
     baseurl = mlcovid_url+'status'
     data = datacollect.get_json(baseurl, {})
     time_live = data[0]['last_update']
+    time_app_current = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     with open('./extra/last_update.txt', 'r') as txt_file:
         time_last = txt_file.readlines()[0].strip()
         if (time_last != time_live):
@@ -142,9 +143,13 @@ def update_check():
             retrieve_all_country_status()
         else:
             print('##data is live and updated '+time_last)
-    return time_live
+    return time_app_current
 
 
 '''
     Helper function for app.py
 '''
+
+
+if __name__ == '__main__':
+    update_check()
