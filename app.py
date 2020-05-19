@@ -400,3 +400,7 @@ def fig_line_chart(value, df_country):
 if __name__ == '__main__':
     # Only set False if deploy on heroku:
     app.run_server(debug=True)
+
+
+def app_rerun():
+    app.run_server(debug=True)
