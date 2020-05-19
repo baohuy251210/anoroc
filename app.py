@@ -12,10 +12,11 @@ import data_rebase
 import os
 from dash.dependencies import Input, Output, State
 '''
-Version 0.3 should-be-changelog:
-    -readme.md
-    -updated data 5/18/2020 Mountain Daylight Time
-    -store data in a better way
+Version 0.3 TODO:
+    *offline css file (not codepen.io)
+    *fix curacao and cote divoire name
+    *heroku scheduler
+    *retouch css
 '''
 
 '''
@@ -24,13 +25,13 @@ Data Frame (pandas) Stuff
 '''
 
 # ataprocess.update_csv_jhu()+" MDT"
-# data_updated_time = "version test"
-data_updated_time = datetime.datetime.strptime(
-    data_rebase.update_check(), '%Y-%m-%dT%H:%M:%S')
+data_updated_time = "version test"
+# data_updated_time = datetime.datetime.strptime(
+# data_rebase.update_check(), '%Y-%m-%dT%H:%M:%S')
 
 # REBASED Stuffs below:
 
-df_rebased_all = pd.read_csv('./data_rebase/country_all_new_status.csv', encoding='cp1252',
+df_rebased_all = pd.read_csv('./data_rebase/country_all_new_status.csv', encoding='utf-8',
                              keep_default_na=False, na_values=['__'])
 df_rebased_all['last_update'] = pd.to_datetime(df_rebased_all['last_update'])
 df_rebased_all = df_rebased_all.drop(columns='country')
@@ -38,7 +39,7 @@ df_rebased_all.columns = ['Country', 'Infected Cases',
                           'Deaths', 'Total Recovered', 'Last Update (UTC)']
 
 df_country_index = pd.read_csv('./data_rebase/country_alpha_index.csv',
-                               keep_default_na=False, na_values=['__'], encoding='cp1252')
+                               keep_default_na=False, na_values=['__'], encoding='utf-8')
 # print(df_rebased_all)
 '''
 -----------------------
@@ -228,12 +229,12 @@ def update_output(value):
     newdf = df_rebased_all[df_rebased_all['Country'] == value].astype(str)
 
     dict_name_alpha = pd.read_csv('./data_rebase/country_alpha_index.csv',
-                                  index_col='name', keep_default_na=False, na_values=['__'], encoding='cp1252').to_dict('index')
+                                  index_col='name', keep_default_na=False, na_values=['__'], encoding='utf-8').to_dict('index')
     country_alpha = dict_name_alpha[value]['alpha2']
     country_url = './data_rebase/country-timeline/{}.csv'.format(country_alpha)
 
     df_country = pd.read_csv(
-        country_url, encoding='cp1252', keep_default_na=False, na_values=['__'])
+        country_url, encoding='utf-8', keep_default_na=False, na_values=['__'])
     df_country = df_country.drop(columns='country')
     df_country['last_update'] = pd.to_datetime(df_country['last_update'])
 
@@ -394,4 +395,4 @@ def fig_line_chart(value, df_country):
 
 if __name__ == '__main__':
     # Only set False if deploy on heroku:
-    app.run_server(debug=False)
+    app.run_server(debug=True)

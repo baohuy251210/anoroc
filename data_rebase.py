@@ -34,7 +34,7 @@ def retrieve_country_alpha2():
     """
     baseurl = mlcovid_url+'countries'
     data = datacollect.get_json(baseurl, {})
-    with open('./data_rebase/country_alpha_index.csv', 'w') as csv_file:
+    with open('./data_rebase/country_alpha_index.csv', 'w', encoding='utf-8') as csv_file:
         field_names = ['name', 'alpha2']
         writer = csv.DictWriter(
             csv_file, fieldnames=field_names, extrasaction='ignore')
@@ -45,7 +45,7 @@ def retrieve_country_alpha2():
 
 
 dict_alpha_name = pd.read_csv('./data_rebase/country_alpha_index.csv',
-                              index_col='alpha2', keep_default_na=False, na_values=['__'], encoding='cp1252').to_dict('index')
+                              index_col='alpha2', keep_default_na=False, na_values=['__'], encoding='utf-8').to_dict('index')
 
 
 def retrieve_all_country_status():
@@ -61,7 +61,7 @@ def retrieve_all_country_status():
     data = datacollect.get_json(baseurl, {})
     url_all_status = './data_rebase/country_all_new_status.csv'
     url_last_update = './extra/last_update.txt'
-    with open(url_all_status, 'w') as csv_file, open(url_last_update, 'w') as txt_file:
+    with open(url_all_status, 'w', encoding='utf-8') as csv_file, open(url_last_update, 'w') as txt_file:
         field_names = ['country', 'name', 'cases',
                        'deaths', 'recovered', 'last_update']
         writer = csv.DictWriter(
@@ -92,7 +92,7 @@ def retrieve_country_timeline(country_alpha2):
     """
     baseurl = mlcovid_url+'timeline/'+country_alpha2
     data = datacollect.get_json(baseurl, {})
-    with open('./data_rebase/country-timeline/'+country_alpha2+'.csv', 'w') as csv_file:
+    with open('./data_rebase/country-timeline/'+country_alpha2+'.csv', 'w', encoding='utf-8') as csv_file:
         field_names = ['country', 'name', 'cases',
                        'deaths', 'recovered', 'last_update']
         writer = csv.DictWriter(
@@ -101,7 +101,8 @@ def retrieve_country_timeline(country_alpha2):
         for day in data[::-1]:
             day['name'] = dict_alpha_name[day['country']]['name']
             writer.writerow(day)
-    print('cluster timeline ' + country_alpha2 + ": OK")
+    print('cluster timeline ' +
+          dict_alpha_name[country_alpha2]['name'] + ": OK")
 
 
 def retrieve_all_country_timeline():
@@ -114,8 +115,8 @@ def retrieve_all_country_timeline():
 Data Rebaser execution lines (execute only one, offline handling)
 '''
 # print(retrieve_all_country_timeline())
-# print(retrieve_country_timeline('US'))
-# print(retrieve_country_alpha2()) #made country_alpha_index.csv
+# print(retrieve_country_timeline('CI'))
+# print(retrieve_country_alpha2())  # made country_alpha_index.csv
 # print(retrieve_all_country_status())  # updated country status all
 
 

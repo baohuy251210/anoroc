@@ -19,7 +19,7 @@ def get_json(_url, _params):
     print(baseurl, ":", "Data Request Status: ", response.status_code)
     try:
         # return python object
-        return json.loads(response.text, encoding='cp1252')
+        return json.loads(response.text, encoding='utf-8')
     except json.decoder.JSONDecodeError:
         return str(response.status_code)
 
