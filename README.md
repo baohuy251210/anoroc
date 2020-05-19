@@ -1,4 +1,6 @@
-#  Anoroc COVID-19 Monitor
+*Update: currently in maintenance, stay tuned for the new design, new databases and new applications I'll try 
+to have version 1.0 up this week :shipit: * 
+#  Anoroc COVID-19 Monitor 
 * Just my simple web Dash application made with Python cuz I wanted to learn Python developing :)
 * Pretty much what I have right now is on ```anoroc.herokuapp.com```
 ## Features Summary:
