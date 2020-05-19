@@ -1,10 +1,12 @@
+from plotly.subplots import make_subplots
+import plotly.io as pio
 import plotly.express as px
 import plotly.graph_objects as go
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
-from datetime import datetime
+import datetime
 import dash_table
 import data_rebase
 import os
@@ -22,8 +24,9 @@ Data Frame (pandas) Stuff
 '''
 
 # ataprocess.update_csv_jhu()+" MDT"
-data_updated_time = datetime.strptime(
-    data_rebase.update_check(), '%Y-%m-%dT%H:%M:%S')
+data_updated_time = "version test"
+# data_updated_time = datetime.strptime(
+# data_rebase.update_check(), '%Y-%m-%dT%H:%M:%S')
 
 # REBASED Stuffs below:
 
@@ -115,25 +118,31 @@ app.layout = html.Div(id='container', className='parent',
                                       'textAlign': 'center'
                                   },
                                   ),
-                          html.H6(children="Version 0.3",
+                          html.H6([html.A("Version 0.3", href='https://github.com/baohuy251210/anoroc')],
                                   style={
                                       'textAlign': 'right',
                                       'fontSize': '13px',
+                                      'fontFamily': 'Arvo',
                                       'fontStyle': 'italic',
-                                      'marginTop': '2px',
-                                  },
-                                  ),
-                          html.H6(children="Historical data for graphs is updated daily (not live on that day)",
+                                      'marginTop': '1px',
+                                      'paddingRight': '25px',
+                          },
+
+                          ),
+                          html.H6(children="Historical data for graphs is updated every 24 hours",
                                   style={
                                       'textAlign': 'right',
                                       'fontSize': '13px',
                                       'fontStyle': 'italic',
                                       'marginBot': '14px',
+                                      'paddingRight': '25px',
+                                      'fontFamily': 'Roboto Condensed'
                                   },
                                   ),
                           html.Br(),
                           html.H5('Select Country to Inspect:', style={
                               'textAlign': 'center',
+                              'fontFamily': 'Jost'
                           }),
                           generate_dropdown(df_country_index),
                           html.Div(id='dropdown-output',
@@ -194,7 +203,7 @@ app.layout = html.Div(id='container', className='parent',
                               'fontWeight': '400'
                           })
                       ], style={
-                          'borderTop': '20px solid #0b222c',
+                          'borderTop': '30px solid #344955',
                           'verticalAlign': 'middle',
                           'textAlign': 'center',
                           'position': 'absolute',
@@ -217,8 +226,19 @@ Handling callbacks:
     [Input('country-dropdown', 'value')])
 def update_output(value):
     newdf = df_rebased_all[df_rebased_all['Country'] == value].astype(str)
-    fig = fig_line_chart(value)
 
+    dict_name_alpha = pd.read_csv('./data_rebase/country_alpha_index.csv',
+                                  index_col='name', keep_default_na=False, na_values=['__'], encoding='cp1252').to_dict('index')
+    country_alpha = dict_name_alpha[value]['alpha2']
+    country_url = './data_rebase/country-timeline/{}.csv'.format(country_alpha)
+
+    df_country = pd.read_csv(
+        country_url, encoding='cp1252', keep_default_na=False, na_values=['__'])
+    df_country = df_country.drop(columns='country')
+    df_country['last_update'] = pd.to_datetime(df_country['last_update'])
+
+    fig = fig_line_chart(value, df_country)
+    # fig = fig_bar_chart(value, df_country)
     return html.Div([dash_table.DataTable(
         id='selected',
         columns=[{'name': i, 'id': i} for i in newdf.columns],
@@ -239,73 +259,136 @@ def update_output(value):
         ],
         data=newdf.to_dict('records')
     ),
-        dcc.Graph(figure=fig, style={'marginTop': '25px', 'width': '50%'})
+        dcc.Graph(figure=fig, style={'marginTop': '25px', 'width': '100%'})
     ]
     )
 
 
 '''
-Helper Function to generate figures 
+Helper Function to generate figures
 '''
 
 
-def fig_line_chart(value):
-    dict_name_alpha = pd.read_csv('./data_rebase/country_alpha_index.csv',
-                                  index_col='name', keep_default_na=False, na_values=['__'], encoding='cp1252').to_dict('index')
-    country_alpha = dict_name_alpha[value]['alpha2']
-    country_url = './data_rebase/country-timeline/{}.csv'.format(country_alpha)
-
-    df_country = pd.read_csv(
-        country_url, encoding='cp1252', keep_default_na=False, na_values=['__'])
-    df_country = df_country.drop(columns='country')
-    df_country['last_update'] = pd.to_datetime(df_country['last_update'])
-
+def fig_line_chart(value, df_country):
     fig = go.Figure()
-
+    df_country['newcases'] = df_country['cases'].diff(1)
+    df_country['newrecovered'] = df_country['recovered'].diff(1)
+    df_country['newdeaths'] = df_country['deaths'].diff(1)
+    fig = make_subplots(rows=2, cols=1,
+                        subplot_titles=('Total Confirmed', 'Daily Confirmed'
+                                        ),
+                        row_heights=[0.5, 0.5],
+                        shared_xaxes=True,
+                        vertical_spacing=0.3
+                        )
     fig.add_trace(go.Scatter(x=df_country['last_update'],
                              y=df_country['cases'],
                              mode='lines',
-                             name='Infected'))
-    fig.add_trace(go.Scatter(x=df_country['last_update'],
-                             y=df_country['deaths'],
-                             mode='lines',
-                             name='Deceased'))
+                             legendgroup='infected',
+                             name='Infected',
+                             line=dict(color='tomato')),
+                  row=1, col=1
+                  )
     fig.add_trace(go.Scatter(x=df_country['last_update'],
                              y=df_country['recovered'],
                              mode='lines',
-                             name='Recovered'))
-
-    fig.update_layout(title=value+': Reported Infected, Deaths and Recovered',
-                      xaxis_title='Timeline',
-                      yaxis_title='Reported Counts'
-                      )
-    fig.update_layout(autosize=True,
+                             legendgroup='recovered',
+                             name='Recovered',
+                             line=dict(color='forestgreen')),
+                  row=1, col=1
+                  )
+    fig.add_trace(go.Scatter(x=df_country['last_update'],
+                             y=df_country['deaths'],
+                             mode='lines',
+                             legendgroup='deceased',
+                             name='Deceased',
+                             line=dict(color='firebrick', width=1)),
+                  row=1, col=1
+                  )
+    fig.add_trace(go.Scatter(x=df_country['last_update'],
+                             y=df_country['newcases'],
+                             mode='lines',
+                             legendgroup='infected',
+                             name='Infected - Daily',
+                             line=dict(color='tomato', width=1.5)),
+                  row=2, col=1
+                  )
+    fig.add_trace(go.Scatter(x=df_country['last_update'],
+                             y=df_country['newrecovered'],
+                             mode='lines',
+                             legendgroup='recovered',
+                             name='Recovered - Daily',
+                             line=dict(color='forestgreen', width=1.5)),
+                  row=2, col=1
+                  )
+    fig.add_trace(go.Scatter(x=df_country['last_update'],
+                             y=df_country['newdeaths'],
+                             mode='lines',
+                             legendgroup='deceased',
+                             name='Deceased - Daily',
+                             line=dict(color='firebrick', width=1.5)),
+                  row=2, col=1
+                  )
+    # fig.update_traces(hoverinfo='x+y', stackgroup='one')
+    fig.update_layout(hovermode='x', autosize=True,
+                      height=800,
                       font=dict(
                           family="Jost",
-                          size=15,
+                          size=12,
                           color="#000000"
                       ),
                       title={
+                          'text': value+': Reported Infected, Deaths and Recovered',
                           'y': 0.95,
                           'x': 0.5,
                           'xanchor': 'center',
-                          'yanchor': 'top'}
+                          'yanchor': 'top'},
+                      xaxis_title='Timeline',
+                      yaxis_title='Reported Counts',
+                      xaxis_range=[datetime.datetime(2020, 4, 10),
+                                   datetime.datetime(2020, 5, 20)],
+                      yaxis=dict(autorange=True, fixedrange=False),
+                      xaxis_rangeslider_visible=True, xaxis_rangeslider_thickness=0.05
                       )
 
-    fig.update_xaxes(rangeslider_visible=True,
-                     rangeselector=dict(
-                         buttons=list([
-                             dict(count=7, label="7d", step="day",
-                                  stepmode="backward"),
-                             dict(count=21, label="3week", step="day",
-                                  stepmode="backward"),
-                             dict(count=1, label="1m", step="month",
-                                  stepmode="backward"),
-                             dict(count=3, label="3m", step="month",
-                                  stepmode="backward"),
-                             dict(step="all")
-                         ])
-                     ))
+    fig.update_layout(hovermode='x', autosize=True,
+                      height=800,
+                      font=dict(
+                          family="Jost",
+                          size=12,
+                          color="#000000"
+                      ),
+                      title={
+                          'text': value+': Reported Infected, Deaths and Recovered',
+                          'y': 0.95,
+                          'x': 0.2,
+                          'xanchor': 'center',
+                          'yanchor': 'top'},
+                      xaxis_title='Timeline',
+                      yaxis_title='Reported Counts',
+                      xaxis_range=[datetime.datetime(2020, 4, 10),
+                                   datetime.datetime(2020, 5, 20)],
+                      yaxis=dict(autorange=True, fixedrange=False),
+                      xaxis_rangeslider_visible=True, xaxis_rangeslider_thickness=0.1
+                      )
+
+    fig.update_xaxes(
+        # rangeslider_visible=True,
+        rangeselector=dict(
+            buttons=list([
+                dict(count=7, label="7d", step="day",
+                     stepmode="backward"),
+                dict(count=21, label="3week", step="day",
+                     stepmode="backward"),
+                dict(count=1, label="1m", step="month",
+                     stepmode="backward"),
+                dict(count=3, label="3m", step="month",
+                     stepmode="backward"),
+                dict(step="all")
+            ]),
+
+        ))
+    fig.update_yaxes(nticks=10)
     return fig
 
 
