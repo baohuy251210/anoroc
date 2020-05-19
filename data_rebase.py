@@ -142,7 +142,8 @@ def update_check():
             print("##data outdate: Updating...({}->{})".format(time_last, time_live))
             retrieve_all_country_status()
         else:
-            print('##data is live and updated '+time_last)
+            print('##data is live and updated{} |app: {} ' +
+                  time_last, time_app_current)
     return time_app_current
 
 
