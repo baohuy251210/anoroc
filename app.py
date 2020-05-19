@@ -12,11 +12,11 @@ import data_rebase
 import os
 from dash.dependencies import Input, Output, State
 '''
-Version 0.3 TODO:
-    *offline css file (not codepen.io)
-    *fix curacao and cote divoire name
-    *heroku scheduler
-    *retouch css
+Version 0.5 TODO:
+    *offline css file (not codepen.io) [x]
+    *fix curacao and cote divoire name [x]
+    *heroku scheduler [ ]
+    *retouch css, bootstrap [ ]
 '''
 
 '''
@@ -99,10 +99,8 @@ def generate_table(dataframe):
 -----------------------
 App.py layouts part
 """
-# external_stylesheets = ['https://codepen.io/baohuy251210/pen/KKdGQep.css']
 external_stylesheets = [
-    'https://codepen.io/baohuy251210/pen/OJyBYoq.css']
-# external_scripts = ['https://codepen.io/zavoloklom/pen/IGkDz.js']
+    './assets/stylesheet.css']
 app = dash.Dash(__name__,
                 external_stylesheets=external_stylesheets)
 server = app.server
@@ -110,7 +108,6 @@ app.title = 'Anoroc Monitor'
 
 app.layout = html.Div(id='container', className='parent',
                       children=[
-
                           html.H1(children='ANOROC - Live Covid19 Monitor',
                                   style={
                                       'marginBottom': '5px',
@@ -119,14 +116,14 @@ app.layout = html.Div(id='container', className='parent',
                                       'textAlign': 'center'
                                   },
                                   ),
-                          html.H6([html.A("Version 0.3", href='https://github.com/baohuy251210/anoroc')],
+                          html.H6([html.A("Version 0.3 Changelog", href='https://github.com/baohuy251210/anoroc')],
                                   style={
                                       'textAlign': 'right',
                                       'fontSize': '13px',
                                       'fontFamily': 'Arvo',
                                       'fontStyle': 'italic',
                                       'marginTop': '1px',
-                                      'paddingRight': '25px',
+                                      'paddingRight': '250px',
                           },
 
                           ),
@@ -136,7 +133,7 @@ app.layout = html.Div(id='container', className='parent',
                                       'fontSize': '13px',
                                       'fontStyle': 'italic',
                                       'marginBot': '14px',
-                                      'paddingRight': '25px',
+                                      'paddingRight': '250px',
                                       'fontFamily': 'Roboto Condensed'
                                   },
                                   ),
