@@ -24,9 +24,9 @@ Data Frame (pandas) Stuff
 '''
 
 # ataprocess.update_csv_jhu()+" MDT"
-data_updated_time = "version test"
-# data_updated_time = datetime.strptime(
-# data_rebase.update_check(), '%Y-%m-%dT%H:%M:%S')
+# data_updated_time = "version test"
+data_updated_time = datetime.strptime(
+    data_rebase.update_check(), '%Y-%m-%dT%H:%M:%S')
 
 # REBASED Stuffs below:
 
