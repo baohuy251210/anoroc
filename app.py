@@ -238,11 +238,14 @@ def update_output_sql(value):
         value {[type]} -- [description]
     """
     print("##", value)
-    print(database.get_country_from_alpha(value))
+    country_name = database.get_country_from_alpha(value)[1]
     df_selected_country = database.get_country_status(
         value).drop(columns='alpha2')
     df_selected_country = df_selected_country.rename(columns={"name": "Country", "cases": "Infected", 'deaths': 'Deaths', 'recovered': 'Recovered',
                                                               'last_update': 'Last Update GMT+0'})
+
+    fig = figure.fig_line_chart(
+        country_name, database.get_country_timeline(value))
     return html.Div([dash_table.DataTable(
         id='selected',
         columns=[{'name': i, 'id': i} for i in df_selected_country.columns],
@@ -263,7 +266,7 @@ def update_output_sql(value):
         ],
         data=df_selected_country.to_dict('records')
     ),
-        # dcc.Graph(figure=fig, style={'marginTop': '25px', 'width': '100%'})
+        dcc.Graph(figure=fig, style={'marginTop': '25px', 'width': '100%'})
     ]
     )
 

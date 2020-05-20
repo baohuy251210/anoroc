@@ -94,8 +94,9 @@ def get_country_status(alpha):
 
     Arguments:
         alpha {str} -- [country's alpha]
+
     Returns:
-        pandas.dataFrame --
+        pandas.dataFrame -- alpha's sql report
     """
     sql_query = 'SELECT * FROM live_status WHERE alpha2 = %s'
     try:
@@ -119,7 +120,9 @@ def get_country_status(alpha):
 
 
 def get_country_timeline(alpha):
-    """Function to retrieve timeline of a country from around jan 22
+    """
+    **NOT DONE
+    Function to retrieve timeline of a country from around jan 22
     https://covid19-api.org/api/timeline/:country_alpha2
     return list of dicts: from current date -> start date
     --'country' : alpha2
@@ -191,3 +194,26 @@ def get_data_last_update_sql():
             db_cursor.close()
             db_conn.close()
             print("PostgreSQL connection is closed")
+
+
+'''
+TODO : Functions that fetch from API and update database.
+-----
+country timeline
+'''
+
+
+def get_country_timeline(alpha):
+    """[summary]
+
+    Arguments:
+        alpha {[type]} -- [description]
+
+    Returns:
+    """
+    baseurl = mlcovid_url+'timeline/'+alpha
+    data = datacollect.get_json(baseurl, {})
+    df_timeline = pd.DataFrame(eval(str(data))).drop(columns='country')
+    return df_timeline
+    print('##Database: retrieve timeline ' +
+          alpha + ": OK")

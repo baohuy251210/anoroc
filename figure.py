@@ -18,9 +18,9 @@ def fig_line_chart(value, df_country):
         plotly.graph_objects.Figure -- Desired subplots
     """
     fig = go.Figure()
-    df_country['newcases'] = df_country['cases'].diff(1)
-    df_country['newrecovered'] = df_country['recovered'].diff(1)
-    df_country['newdeaths'] = df_country['deaths'].diff(1)
+    df_country['newcases'] = df_country['cases'].diff(-1)
+    df_country['newrecovered'] = df_country['recovered'].diff(-1)
+    df_country['newdeaths'] = df_country['deaths'].diff(-1)
     fig = make_subplots(rows=2, cols=1,
                         subplot_titles=('Total Confirmed', 'Daily Confirmed'
                                         ),
