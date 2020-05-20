@@ -2,11 +2,10 @@ import os
 import datetime
 import csv
 import psycopg2
-import data_rebase
 import datacollect
 import pandas as pd
 from sqlalchemy import create_engine
-mlcovid_url = data_rebase.mlcovid_url
+mlcovid_url = 'https://covid19-api.org/api/'
 
 
 thost = 'localhost'
@@ -14,7 +13,7 @@ tport = '5432'
 tdbname = 'postgres'
 tuser = 'postgres'
 tpw = 'cyos94'
-database_url = 'postgres://wokxqtzumnljhn:58d6e6165cec6a0de10683ac93d242099c1b3add8751fc18f80a838379c6d4c2@ec2-34-200-72-77.compute-1.amazonaws.com:5432/dcr96h9mtra8a4'
+database_url = 'postgres://vzcptenkjokmte:2c303f140cd5b887e5f0a3274e5e5db2c6a9d2a4e3825242550974193bf7c910@ec2-34-206-31-217.compute-1.amazonaws.com:5432/daa9tdg04a4o0v'
 
 
 def sql_test_conn(local):
@@ -171,8 +170,39 @@ def get_country_status(alpha, local):
         db_cursor.execute("SELECT current_database();")
         record = db_cursor.fetchone()
         print("You are connected to - ", record[0], "\n")
-        db_cursor.execute(sql_query, (alpha,))
         df_selected = pd.read_sql(sql_query, db_conn, params=(alpha,))
+        db_conn.commit()
+        return df_selected
+    except (Exception, psycopg2.Error) as error:
+        print("Error while connecting to PostgreSQL", error)
+    finally:
+        if(db_conn):
+            db_cursor.close()
+            db_conn.close()
+            print("PostgreSQL connection is closed")
+
+
+def get_df_all_country_status(local):
+    """ generate live status of a country to df
+
+    Arguments:
+        alpha {str} -- [country's alpha]
+
+    Returns:
+        pandas.dataFrame -- alpha's sql report
+    """
+    sql_query = 'SELECT * FROM live_status'
+    try:
+        if local:
+            db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
+                                       user=tuser, password=tpw)
+        else:
+            db_conn = psycopg2.connect(database_url, sslmode='require')
+        db_cursor = db_conn.cursor()
+        db_cursor.execute("SELECT current_database();")
+        record = db_cursor.fetchone()
+        print("You are connected to - ", record[0], "\n")
+        df_selected = pd.read_sql(sql_query, db_conn)
         db_conn.commit()
         return df_selected
     except (Exception, psycopg2.Error) as error:
@@ -276,7 +306,7 @@ def sql_retrieve_all_status(local):
 
         sql_query = 'INSERT INTO live_status VALUES(%s, %s, %s, %s, %s, %s)'
         for row in data:
-            row['name'] = get_country_from_alpha(row['country'], local)[0]
+            row['name'] = get_country_from_alpha(row['country'], local)[1]
             db_cursor.execute(sql_query, (row['country'], row['name'], row['cases'],
                                           row['deaths'], row['recovered'], row['last_update']))
             db_conn.commit()
@@ -305,14 +335,18 @@ def sql_update_all_status(local):
 
         sql_query = '''UPDATE live_status
                         SET cases = %s,
+                        name = %s,
                         deaths = %s,
                         recovered = %s,
                         last_update = %s
                         WHERE alpha2 = %s AND last_update != %s
         '''
         for row in data:
-            db_cursor.execute(sql_query, (row['cases'], row['deaths'], row['recovered'],
+            country_name = get_country_from_alpha(row['country'], False)[1]
+            print(country_name)
+            db_cursor.execute(sql_query, (row['cases'], country_name, row['deaths'], row['recovered'],
                                           row['last_update'], row['country'], row['last_update']))
+            db_conn.commit()
     except (Exception, psycopg2.Error) as error:
         print("Error while connecting to PostgreSQL", error)
     finally:
@@ -320,3 +354,7 @@ def sql_update_all_status(local):
             db_cursor.close()
             db_conn.close()
             print("PostgreSQL connection is closed")
+
+
+# sql_update_all_status(False)
+# print(get_df_all_country_status(False))
