@@ -1,3 +1,4 @@
+import datetime
 import csv
 import psycopg2
 import data_rebase
@@ -143,3 +144,50 @@ def get_country_timeline(alpha):
             writer.writerow(day)
     print('cluster timeline ' +
           country_name + ": OK")
+
+
+def get_data_last_update_api():
+    """Function to fetch the last update time of 
+    a country given its alpha code from covid19-api.org
+    this function is country specific [US]
+    Timezone: UTC / GMT+0
+    Arguments:
+        alpha {str} -- [country's alpha code]
+
+    Returns:
+        [str] -- [time UTC of alpha's last update time]
+    """
+    baseurl = mlcovid_url+'status'
+    data = datacollect.get_json(baseurl, {})
+    time_api = data[0]['last_update']
+    return time_api
+
+
+def get_data_last_update_sql():
+    """Function to fetch the last update time of 
+    a country given its alpha code from Postgres
+    this function is country specific [US]
+    Timezone: UTC / GMT+0
+    Arguments:
+        alpha {str} -- [country's alpha code]
+    Returns:
+        [str] -- [time UTC of alpha's last update time]
+    """
+    sql_query = "SELECT last_update FROM live_status WHERE alpha2 = 'US'"
+    try:
+        db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
+                                   user=tuser, password=tpw)
+        db_cursor = db_conn.cursor()
+        db_cursor.execute("SELECT version();")
+        record = db_cursor.fetchone()
+        print("You are connected to - ", record, "\n")
+        db_cursor.execute(sql_query)
+        db_conn.commit()
+        return db_cursor.fetchone()[0]
+    except (Exception, psycopg2.Error) as error:
+        print("Error while connecting to PostgreSQL", error)
+    finally:
+        if(db_conn):
+            db_cursor.close()
+            db_conn.close()
+            print("PostgreSQL connection is closed")
