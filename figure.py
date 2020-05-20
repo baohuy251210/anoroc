@@ -7,6 +7,15 @@ import plotly.graph_objects as go
 
 
 def fig_line_chart(value, df_country):
+    """Take pandas.dataframe - timeline of a country 
+    and generate line charts of total and daily 
+    by timeline.
+    Arguments:
+        value {str} -- [country's name]
+        df_country {pandas.DataFrame} --  columns:'cases', 'recovered', 'deaths', 'last_update'
+    Returns:
+        plotly.graph_objects.Figure -- Desired subplots
+    """
     fig = go.Figure()
     df_country['newcases'] = df_country['cases'].diff(1)
     df_country['newrecovered'] = df_country['recovered'].diff(1)

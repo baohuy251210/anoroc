@@ -2,6 +2,8 @@ import csv
 import psycopg2
 import data_rebase
 import datacollect
+import pandas as pd
+from sqlalchemy import create_engine
 mlcovid_url = data_rebase.mlcovid_url
 
 
@@ -64,7 +66,58 @@ def get_country_from_alpha(country_alpha):
             print("PostgreSQL connection is closed")
 
 
+def get_df_country_index():
+    sql_query = 'SELECT * FROM alpha2_index'
+    try:
+        db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
+                                   user=tuser, password=tpw)
+        db_cursor = db_conn.cursor()
+        db_cursor.execute("SELECT version();")
+        record = db_cursor.fetchone()
+        print("You are connected to - ", record, "\n")
+        db_cursor.execute(sql_query)
+        df_country_index = pd.read_sql(sql_query, db_conn)
+        db_conn.commit()
+        return df_country_index
+    except (Exception, psycopg2.Error) as error:
+        print("Error while connecting to PostgreSQL", error)
+    finally:
+        if(db_conn):
+            db_cursor.close()
+            db_conn.close()
+            print("PostgreSQL connection is closed")
+
+
 def get_country_status(alpha):
+    """ generate live status of a country to df
+
+    Arguments:
+        alpha {str} -- [country's alpha]
+    Returns:
+        pandas.dataFrame --
+    """
+    sql_query = 'SELECT * FROM live_status WHERE alpha2 = %s'
+    try:
+        db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
+                                   user=tuser, password=tpw)
+        db_cursor = db_conn.cursor()
+        db_cursor.execute("SELECT version();")
+        record = db_cursor.fetchone()
+        print("You are connected to - ", record, "\n")
+        db_cursor.execute(sql_query, (alpha,))
+        df_selected = pd.read_sql(sql_query, db_conn, params=(alpha,))
+        db_conn.commit()
+        return df_selected
+    except (Exception, psycopg2.Error) as error:
+        print("Error while connecting to PostgreSQL", error)
+    finally:
+        if(db_conn):
+            db_cursor.close()
+            db_conn.close()
+            print("PostgreSQL connection is closed")
+
+
+def get_country_timeline(alpha):
     """Function to retrieve timeline of a country from around jan 22
     https://covid19-api.org/api/timeline/:country_alpha2
     return list of dicts: from current date -> start date

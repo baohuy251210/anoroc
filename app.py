@@ -39,8 +39,7 @@ df_rebased_all = df_rebased_all.drop(columns='country')
 df_rebased_all.columns = ['Country', 'Infected Cases',
                           'Deaths', 'Total Recovered', 'Last Update (UTC)']
 
-df_country_index = pd.read_csv('./data_rebase/country_alpha_index.csv',
-                               keep_default_na=False, na_values=['__'], encoding='utf-8')
+df_country_index = database.get_df_country_index()
 # print(df_country_index)
 '''
 -----------------------
@@ -51,8 +50,8 @@ Dash Core/Html component generators
 def generate_dropdown(dframe):
     lst = []
     for i in range(len(dframe)):
-        lst.append({'label': dframe.iloc[i][0]+', '+dframe.iloc[i][1],
-                    'value': dframe.iloc[i][1]})
+        lst.append({'label': dframe.iloc[i][1]+', '+dframe.iloc[i][0],
+                    'value': dframe.iloc[i][0]})
 
     # print(lst)
     return dcc.Dropdown(
@@ -61,7 +60,7 @@ def generate_dropdown(dframe):
         placeholder="Select country to inspect",
         clearable=False,
         searchable=True,
-        value=dframe.iloc[-8][1],  # United States of America
+        value=dframe.iloc[-8][0],  # value = 'us'
         style={
             'fontFamily': 'Jost',
             'display': 'inline-block',
@@ -234,7 +233,39 @@ Handling callbacks:
     Output('dropdown-output', 'children'),
     [Input('country-dropdown', 'value')])
 def update_output_sql(value):
-    alpha, name = database.get_country_from_alpha(value)
+    """Input- value: country's alpha
+    Arguments:
+        value {[type]} -- [description]
+    """
+    print("##", value)
+    print(database.get_country_from_alpha(value))
+    df_selected_country = database.get_country_status(
+        value).drop(columns='alpha2')
+    df_selected_country = df_selected_country.rename(columns={"name": "Country", "cases": "Infected", 'deaths': 'Deaths', 'recovered': 'Recovered',
+                                                              'last_update': 'Last Update GMT+0'})
+    return html.Div([dash_table.DataTable(
+        id='selected',
+        columns=[{'name': i, 'id': i} for i in df_selected_country.columns],
+        style_cell={
+            'whitespace': 'normal',
+            'minWidth': '130px', 'width': '130px', 'maxWidth': '130px',
+            'fontSize': 15,
+            'textAlign': 'center',
+            'color': 'rgba(0,0,0,0.87)',
+            'fontFamily': 'Jost'
+        },
+        style_cell_conditional=[
+            {'if': {'column_id': 'Country'},
+             'width': '23%'},
+            {'if': {'column_id': 'Infected'},
+             'width': '10%'},
+
+        ],
+        data=df_selected_country.to_dict('records')
+    ),
+        # dcc.Graph(figure=fig, style={'marginTop': '25px', 'width': '100%'})
+    ]
+    )
 
 # @app.callback(
 #     Output('dropdown-output', 'children'),
@@ -254,29 +285,6 @@ def update_output_sql(value):
 
 #     fig = figure.fig_line_chart(value, df_country)
 #     # fig = fig_bar_chart(value, df_country)
-#     return html.Div([dash_table.DataTable(
-#         id='selected',
-#         columns=[{'name': i, 'id': i} for i in newdf.columns],
-#         style_cell={
-#             'whitespace': 'normal',
-#             'minWidth': '130px', 'width': '130px', 'maxWidth': '130px',
-#             'fontSize': 15,
-#             'textAlign': 'center',
-#             'color': 'rgba(0,0,0,0.87)',
-#             'fontFamily': 'Jost'
-#         },
-#         style_cell_conditional=[
-#             {'if': {'column_id': 'Country'},
-#              'width': '23%'},
-#             {'if': {'column_id': 'Infected'},
-#              'width': '10%'},
-
-#         ],
-#         data=newdf.to_dict('records')
-#     ),
-#         dcc.Graph(figure=fig, style={'marginTop': '25px', 'width': '100%'})
-#     ]
-#     )
 
 
 '''
@@ -285,4 +293,4 @@ Helper Function SQL
 
 if __name__ == '__main__':
     # Only set False if deploy on heroku:
-    app.run_server(debug=False)
+    app.run_server(debug=True)
