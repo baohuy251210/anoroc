@@ -53,40 +53,6 @@ dict_alpha_name = pd.read_csv('./data_rebase/country_alpha_index.csv',
                               index_col='alpha2', keep_default_na=False, na_values=['__'], encoding='utf-8').to_dict('index')
 
 
-def sql_retrieve_all_status():
-    """
-    `row` format:{'country': 'PR', 'last_update': '2020-03-17T16:13:14', 'cases': 0, 'deaths': 0, 'recovered': 0, 'name': 'Puerto Rico'}
-    """
-    thost = 'localhost'
-    tport = '5432'
-    tdbname = 'postgres'
-    tuser = 'postgres'
-    tpw = 'cyos94'
-    baseurl = mlcovid_url+'status'
-    data = datacollect.get_json(baseurl, {})
-    try:
-        db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
-                                   user=tuser, password=tpw)
-        db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT version();")
-        record = db_cursor.fetchone()
-        print("You are connected to - ", record, "\n")
-
-        sql_query = 'INSERT INTO live_status VALUES(%s, %s, %s, %s, %s, %s)'
-        for row in data:
-            row['name'] = dict_alpha_name[row['country']]['name']
-            db_cursor.execute(sql_query, (row['country'], row['name'], row['cases'],
-                                          row['deaths'], row['recovered'], row['last_update']))
-            db_conn.commit()
-    except (Exception, psycopg2.Error) as error:
-        print("Error while connecting to PostgreSQL", error)
-    finally:
-        if(db_conn):
-            db_cursor.close()
-            db_conn.close()
-            print("PostgreSQL connection is closed")
-
-
 # sql_retrieve_all_status()
 
 # load_country()

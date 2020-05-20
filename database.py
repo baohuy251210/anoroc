@@ -217,3 +217,63 @@ def get_country_timeline(alpha):
     return df_timeline
     print('##Database: retrieve timeline ' +
           alpha + ": OK")
+
+
+def sql_retrieve_all_status():
+    """
+    `row` format:{'country': 'PR', 'last_update': '2020-03-17T16:13:14', 'cases': 0, 'deaths': 0, 'recovered': 0, 'name': 'Puerto Rico'}
+    """
+    baseurl = mlcovid_url+'status'
+    data = datacollect.get_json(baseurl, {})
+    try:
+        db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
+                                   user=tuser, password=tpw)
+        db_cursor = db_conn.cursor()
+        db_cursor.execute("SELECT version();")
+        record = db_cursor.fetchone()
+        print("You are connected to - ", record)
+
+        sql_query = 'INSERT INTO live_status VALUES(%s, %s, %s, %s, %s, %s)'
+        for row in data:
+            row['name'] = get_country_from_alpha(row['country'])[0]
+            db_cursor.execute(sql_query, (row['country'], row['name'], row['cases'],
+                                          row['deaths'], row['recovered'], row['last_update']))
+            db_conn.commit()
+    except (Exception, psycopg2.Error) as error:
+        print("Error while connecting to PostgreSQL", error)
+    finally:
+        if(db_conn):
+            db_cursor.close()
+            db_conn.close()
+            print("PostgreSQL connection is closed")
+
+
+def sql_update_all_status():
+    baseurl = mlcovid_url+'status'
+    data = datacollect.get_json(baseurl, {})
+    try:
+        db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
+                                   user=tuser, password=tpw)
+        db_conn.autocommit = True
+        db_cursor = db_conn.cursor()
+        db_cursor.execute("SELECT version();")
+        record = db_cursor.fetchone()
+        print("You are connected to - ", record)
+
+        sql_query = '''UPDATE live_status
+                        SET cases = %s,
+                        deaths = %s,
+                        recovered = %s,
+                        last_update = %s
+                        WHERE alpha2 = %s AND last_update != %s
+        '''
+        for row in data:
+            db_cursor.execute(sql_query, (row['cases'], row['deaths'], row['recovered'],
+                                          row['last_update'], row['country'], row['last_update']))
+    except (Exception, psycopg2.Error) as error:
+        print("Error while connecting to PostgreSQL", error)
+    finally:
+        if(db_conn):
+            db_cursor.close()
+            db_conn.close()
+            print("PostgreSQL connection is closed")
