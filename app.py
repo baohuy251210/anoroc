@@ -1,3 +1,5 @@
+import database
+import psycopg2
 import figure
 from plotly.subplots import make_subplots
 import plotly.io as pio
@@ -26,8 +28,8 @@ Data Frame (pandas) Stuff
 '''
 
 # ataprocess.update_csv_jhu()+" MDT"
-# data_updated_time = "version test"
-data_updated_time = data_rebase.update_check()
+data_updated_time = "version test"
+# data_updated_time = data_rebase.update_check()
 # REBASED Stuffs below:
 
 df_rebased_all = pd.read_csv('./data_rebase/country_all_new_status.csv', encoding='utf-8',
@@ -39,7 +41,7 @@ df_rebased_all.columns = ['Country', 'Infected Cases',
 
 df_country_index = pd.read_csv('./data_rebase/country_alpha_index.csv',
                                keep_default_na=False, na_values=['__'], encoding='utf-8')
-# print(df_rebased_all)
+# print(df_country_index)
 '''
 -----------------------
 Dash Core/Html component generators
@@ -50,7 +52,8 @@ def generate_dropdown(dframe):
     lst = []
     for i in range(len(dframe)):
         lst.append({'label': dframe.iloc[i][0]+', '+dframe.iloc[i][1],
-                    'value': dframe.iloc[i][0]})
+                    'value': dframe.iloc[i][1]})
+
     # print(lst)
     return dcc.Dropdown(
         id='country-dropdown',
@@ -58,7 +61,7 @@ def generate_dropdown(dframe):
         placeholder="Select country to inspect",
         clearable=False,
         searchable=True,
-        value=dframe.iloc[-8][0],  # United States of America
+        value=dframe.iloc[-8][1],  # United States of America
         style={
             'fontFamily': 'Jost',
             'display': 'inline-block',
@@ -230,50 +233,55 @@ Handling callbacks:
 @app.callback(
     Output('dropdown-output', 'children'),
     [Input('country-dropdown', 'value')])
-def update_output(value):
-    newdf = df_rebased_all[df_rebased_all['Country'] == value].astype(str)
+def update_output_sql(value):
+    alpha, name = database.get_country_from_alpha(value)
 
-    dict_name_alpha = pd.read_csv('./data_rebase/country_alpha_index.csv',
-                                  index_col='name', keep_default_na=False, na_values=['__'], encoding='utf-8').to_dict('index')
-    country_alpha = dict_name_alpha[value]['alpha2']
-    country_url = './data_rebase/country-timeline/{}.csv'.format(country_alpha)
+# @app.callback(
+#     Output('dropdown-output', 'children'),
+#     [Input('country-dropdown', 'value')])
+# def update_output(value):
+#     newdf = df_rebased_all[df_rebased_all['Country'] == value].astype(str)
 
-    df_country = pd.read_csv(
-        country_url, encoding='utf-8', keep_default_na=False, na_values=['__'])
-    df_country = df_country.drop(columns='country')
-    df_country['last_update'] = pd.to_datetime(df_country['last_update'])
+#     dict_name_alpha = pd.read_csv('./data_rebase/country_alpha_index.csv',
+#                                   index_col='name', keep_default_na=False, na_values=['__'], encoding='utf-8').to_dict('index')
+#     country_alpha = dict_name_alpha[value]['alpha2']
+#     country_url = './data_rebase/country-timeline/{}.csv'.format(country_alpha)
 
-    fig = figure.fig_line_chart(value, df_country)
-    # fig = fig_bar_chart(value, df_country)
-    return html.Div([dash_table.DataTable(
-        id='selected',
-        columns=[{'name': i, 'id': i} for i in newdf.columns],
-        style_cell={
-            'whitespace': 'normal',
-            'minWidth': '130px', 'width': '130px', 'maxWidth': '130px',
-            'fontSize': 15,
-            'textAlign': 'center',
-            'color': 'rgba(0,0,0,0.87)',
-            'fontFamily': 'Jost'
-        },
-        style_cell_conditional=[
-            {'if': {'column_id': 'Country'},
-             'width': '23%'},
-            {'if': {'column_id': 'Infected'},
-             'width': '10%'},
+#     df_country = pd.read_csv(
+#         country_url, encoding='utf-8', keep_default_na=False, na_values=['__'])
+#     df_country = df_country.drop(columns='country')
+#     df_country['last_update'] = pd.to_datetime(df_country['last_update'])
 
-        ],
-        data=newdf.to_dict('records')
-    ),
-        dcc.Graph(figure=fig, style={'marginTop': '25px', 'width': '100%'})
-    ]
-    )
+#     fig = figure.fig_line_chart(value, df_country)
+#     # fig = fig_bar_chart(value, df_country)
+#     return html.Div([dash_table.DataTable(
+#         id='selected',
+#         columns=[{'name': i, 'id': i} for i in newdf.columns],
+#         style_cell={
+#             'whitespace': 'normal',
+#             'minWidth': '130px', 'width': '130px', 'maxWidth': '130px',
+#             'fontSize': 15,
+#             'textAlign': 'center',
+#             'color': 'rgba(0,0,0,0.87)',
+#             'fontFamily': 'Jost'
+#         },
+#         style_cell_conditional=[
+#             {'if': {'column_id': 'Country'},
+#              'width': '23%'},
+#             {'if': {'column_id': 'Infected'},
+#              'width': '10%'},
+
+#         ],
+#         data=newdf.to_dict('records')
+#     ),
+#         dcc.Graph(figure=fig, style={'marginTop': '25px', 'width': '100%'})
+#     ]
+#     )
 
 
 '''
-Helper Function to generate figures
+Helper Function SQL
 '''
-
 
 if __name__ == '__main__':
     # Only set False if deploy on heroku:
