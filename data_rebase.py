@@ -8,22 +8,94 @@ https://documenter.getpostman.com/view/10877427/SzYW2f8n?version=latest#e56a91bb
 
 
 """
+import psycopg2
 import json
 import csv
 import numpy as np
 import pandas as pd
 import datacollect
 import datetime
+mlcovid_url = 'https://covid19-api.org/api/'
 
 
+def create_table_1():
+    conn = psycopg2.connect(
+        'host=localhost dbname=postgres user=postgres password=cyos94')
+    cur = conn.cursor()
+    cur.execute('''
+    CREATE TABLE alpha2_index(
+        alpha2 char(2) PRIMARY KEY,
+        name text
+    )
+    ''')
+    conn.commit()
+
+
+def load_country():
+    thost = 'localhost'
+    tport = '5432'
+    tdbname = 'postgres'
+    tuser = 'postgres'
+    tpw = 'cyos94'
+    db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
+                               user=tuser, password=tpw)
+    db_cursor = db_conn.cursor()
+    with open('./data_rebase/country_alpha_index.csv', 'r', encoding='utf-8') as csv_file:
+        reader = csv.DictReader(csv_file)
+        for row in reader:
+            db_cursor.execute(
+                "INSERT INTO alpha2_index VALUES (%s, %s)", (row['alpha2'], row['name']))
+            print(row['alpha2'], row['name'])
+    db_conn.commit()
+
+
+dict_alpha_name = pd.read_csv('./data_rebase/country_alpha_index.csv',
+                              index_col='alpha2', keep_default_na=False, na_values=['__'], encoding='utf-8').to_dict('index')
+
+
+def sql_retrieve_all_status():
+    """
+    `row` format:{'country': 'PR', 'last_update': '2020-03-17T16:13:14', 'cases': 0, 'deaths': 0, 'recovered': 0, 'name': 'Puerto Rico'}
+    """
+    thost = 'localhost'
+    tport = '5432'
+    tdbname = 'postgres'
+    tuser = 'postgres'
+    tpw = 'cyos94'
+    baseurl = mlcovid_url+'status'
+    data = datacollect.get_json(baseurl, {})
+    try:
+        db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
+                                   user=tuser, password=tpw)
+        db_cursor = db_conn.cursor()
+        db_cursor.execute("SELECT version();")
+        record = db_cursor.fetchone()
+        print("You are connected to - ", record, "\n")
+
+        sql_query = 'INSERT INTO live_status VALUES(%s, %s, %s, %s, %s, %s)'
+        for row in data:
+            row['name'] = dict_alpha_name[row['country']]['name']
+            db_cursor.execute(sql_query, (row['country'], row['name'], row['cases'],
+                                          row['deaths'], row['recovered'], row['last_update']))
+            db_conn.commit()
+    except (Exception, psycopg2.Error) as error:
+        print("Error while connecting to PostgreSQL", error)
+    finally:
+        if(db_conn):
+            db_cursor.close()
+            db_conn.close()
+            print("PostgreSQL connection is closed")
+
+
+# sql_retrieve_all_status()
+
+# load_country()
 """
     https://covid19-api.org/api/country/:country #get countries 
     --Focus on "name" and "alpha2"
     ---"name": official name?
     ---"alpha2": country code also param for country in this api
 """
-
-mlcovid_url = 'https://covid19-api.org/api/'
 
 
 def retrieve_country_alpha2():
@@ -42,10 +114,6 @@ def retrieve_country_alpha2():
         for country in data:
             writer.writerow(country)
     print("##country_alpha_index created")
-
-
-dict_alpha_name = pd.read_csv('./data_rebase/country_alpha_index.csv',
-                              index_col='alpha2', keep_default_na=False, na_values=['__'], encoding='utf-8').to_dict('index')
 
 
 def retrieve_all_country_status():
@@ -150,7 +218,3 @@ def update_check():
 '''
     Helper function for app.py
 '''
-
-
-if __name__ == '__main__':
-    update_check()
