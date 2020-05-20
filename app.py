@@ -27,6 +27,7 @@ Version 0.5 TODO:
 Data Frame (pandas) Stuff
 '''
 
+database_local_status = False
 # ataprocess.update_csv_jhu()+" MDT"
 data_updated_time = "version test"
 # data_updated_time = data_rebase.update_check()
@@ -39,7 +40,7 @@ df_rebased_all = df_rebased_all.drop(columns='country')
 df_rebased_all.columns = ['Country', 'Infected Cases',
                           'Deaths', 'Total Recovered', 'Last Update (UTC)']
 
-df_country_index = database.get_df_country_index()
+df_country_index = database.get_df_country_index(database_local_status)
 # print(df_country_index)
 '''
 -----------------------
@@ -237,10 +238,14 @@ def update_output_sql(value):
     Arguments:
         value {[type]} -- [description]
     """
-    print("##", value)
-    country_name = database.get_country_from_alpha(value)[1]
+    country_name = database.get_country_from_alpha(
+        value, database_local_status)[1]
+    print("##", country_name)
+
     df_selected_country = database.get_country_status(
-        value).drop(columns='alpha2')
+        value, database_local_status).drop(columns='alpha2')
+    df_selected_country['name'] = df_selected_country['name'].apply(
+        lambda x: country_name)
     df_selected_country = df_selected_country.rename(columns={"name": "Country", "cases": "Infected", 'deaths': 'Deaths', 'recovered': 'Recovered',
                                                               'last_update': 'Last Update GMT+0'})
 
@@ -269,25 +274,6 @@ def update_output_sql(value):
         dcc.Graph(figure=fig, style={'marginTop': '25px', 'width': '100%'})
     ]
     )
-
-# @app.callback(
-#     Output('dropdown-output', 'children'),
-#     [Input('country-dropdown', 'value')])
-# def update_output(value):
-#     newdf = df_rebased_all[df_rebased_all['Country'] == value].astype(str)
-
-#     dict_name_alpha = pd.read_csv('./data_rebase/country_alpha_index.csv',
-#                                   index_col='name', keep_default_na=False, na_values=['__'], encoding='utf-8').to_dict('index')
-#     country_alpha = dict_name_alpha[value]['alpha2']
-#     country_url = './data_rebase/country-timeline/{}.csv'.format(country_alpha)
-
-#     df_country = pd.read_csv(
-#         country_url, encoding='utf-8', keep_default_na=False, na_values=['__'])
-#     df_country = df_country.drop(columns='country')
-#     df_country['last_update'] = pd.to_datetime(df_country['last_update'])
-
-#     fig = figure.fig_line_chart(value, df_country)
-#     # fig = fig_bar_chart(value, df_country)
 
 
 '''

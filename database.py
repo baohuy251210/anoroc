@@ -1,3 +1,4 @@
+import os
 import datetime
 import csv
 import psycopg2
@@ -13,21 +14,76 @@ tport = '5432'
 tdbname = 'postgres'
 tuser = 'postgres'
 tpw = 'cyos94'
+database_url = 'postgres://wokxqtzumnljhn:58d6e6165cec6a0de10683ac93d242099c1b3add8751fc18f80a838379c6d4c2@ec2-34-200-72-77.compute-1.amazonaws.com:5432/dcr96h9mtra8a4'
 
 
-def get_country_from_name(country_name):
+def sql_test_conn(local):
+    try:
+        if local:
+            db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
+                                       user=tuser, password=tpw)
+        else:
+            db_conn = psycopg2.connect(database_url, sslmode='require')
+        db_cursor = db_conn.cursor()
+        db_cursor.execute("SELECT current_database();")
+        record = db_cursor.fetchone()
+        print("You are connected to - ", record[0], "\n")
+        db_conn.commit()
+        return record
+    except (Exception, psycopg2.Error) as error:
+        print("Error while connecting to PostgreSQL", error)
+    finally:
+        if(db_conn):
+            db_cursor.close()
+            db_conn.close()
+            print("PostgreSQL connection is closed")
+
+
+def load_country(local):
+    """[summary]
+    """
+    try:
+        if local:
+            db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
+                                       user=tuser, password=tpw)
+        else:
+            db_conn = psycopg2.connect(database_url, sslmode='require')
+        db_cursor = db_conn.cursor()
+        db_cursor.execute("SELECT current_database();")
+        record = db_cursor.fetchone()
+        print("You are connected to - ", record[0], "\n")
+        with open('./data_rebase/country_alpha_index.csv', 'r', encoding='utf-8') as csv_file:
+            reader = csv.DictReader(csv_file)
+            for row in reader:
+                db_cursor.execute(
+                    "INSERT INTO alpha2_index VALUES (%s, %s)", (row['alpha2'], row['name']))
+                print(row['alpha2'], row['name'])
+        db_conn.commit()
+    except (Exception, psycopg2.Error) as error:
+        print("Error while connecting to PostgreSQL", error)
+    finally:
+        if(db_conn):
+            db_cursor.close()
+            db_conn.close()
+            print("PostgreSQL connection is closed")
+
+
+def get_country_from_name(country_name, local):
     """Get country index from SQL given country alpha-2
     Returns:
         tuple -- (alpha, name)
     """
     sql_query = 'SELECT alpha2, name FROM alpha2_index WHERE name = %s'
     try:
-        db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
-                                   user=tuser, password=tpw)
+        if local:
+            db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
+                                       user=tuser, password=tpw)
+        else:
+            db_conn = psycopg2.connect(database_url, sslmode='require')
         db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT version();")
+        db_cursor.execute("SELECT current_database();")
         record = db_cursor.fetchone()
-        print("You are connected to - ", record, "\n")
+        print("You are connected to - ", record[0], "\n")
         db_cursor.execute(sql_query, (country_name,))
         record = db_cursor.fetchone()
         db_conn.commit()
@@ -41,19 +97,22 @@ def get_country_from_name(country_name):
             print("PostgreSQL connection is closed")
 
 
-def get_country_from_alpha(country_alpha):
+def get_country_from_alpha(country_alpha, local):
     """Get country index from SQL given country alpha-2
     Returns:
         tuple -- (alpha, name)
     """
     sql_query = 'SELECT alpha2, name FROM alpha2_index WHERE alpha2 = %s'
     try:
-        db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
-                                   user=tuser, password=tpw)
+        if local:
+            db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
+                                       user=tuser, password=tpw)
+        else:
+            db_conn = psycopg2.connect(database_url, sslmode='require')
         db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT version();")
+        db_cursor.execute("SELECT current_database();")
         record = db_cursor.fetchone()
-        print("You are connected to - ", record, "\n")
+        print("You are connected to - ", record[0], "\n")
         db_cursor.execute(sql_query, (country_alpha,))
         record = db_cursor.fetchone()
         db_conn.commit()
@@ -67,15 +126,18 @@ def get_country_from_alpha(country_alpha):
             print("PostgreSQL connection is closed")
 
 
-def get_df_country_index():
+def get_df_country_index(local):
     sql_query = 'SELECT * FROM alpha2_index'
     try:
-        db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
-                                   user=tuser, password=tpw)
+        if local:
+            db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
+                                       user=tuser, password=tpw)
+        else:
+            db_conn = psycopg2.connect(database_url, sslmode='require')
         db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT version();")
+        db_cursor.execute("SELECT current_database();")
         record = db_cursor.fetchone()
-        print("You are connected to - ", record, "\n")
+        print("You are connected to - ", record[0], "\n")
         db_cursor.execute(sql_query)
         df_country_index = pd.read_sql(sql_query, db_conn)
         db_conn.commit()
@@ -89,7 +151,7 @@ def get_df_country_index():
             print("PostgreSQL connection is closed")
 
 
-def get_country_status(alpha):
+def get_country_status(alpha, local):
     """ generate live status of a country to df
 
     Arguments:
@@ -100,12 +162,15 @@ def get_country_status(alpha):
     """
     sql_query = 'SELECT * FROM live_status WHERE alpha2 = %s'
     try:
-        db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
-                                   user=tuser, password=tpw)
+        if local:
+            db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
+                                       user=tuser, password=tpw)
+        else:
+            db_conn = psycopg2.connect(database_url, sslmode='require')
         db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT version();")
+        db_cursor.execute("SELECT current_database();")
         record = db_cursor.fetchone()
-        print("You are connected to - ", record, "\n")
+        print("You are connected to - ", record[0], "\n")
         db_cursor.execute(sql_query, (alpha,))
         df_selected = pd.read_sql(sql_query, db_conn, params=(alpha,))
         db_conn.commit()
@@ -117,36 +182,6 @@ def get_country_status(alpha):
             db_cursor.close()
             db_conn.close()
             print("PostgreSQL connection is closed")
-
-
-def get_country_timeline(alpha):
-    """
-    **NOT DONE
-    Function to retrieve timeline of a country from around jan 22
-    https://covid19-api.org/api/timeline/:country_alpha2
-    return list of dicts: from current date -> start date
-    --'country' : alpha2
-    --'last_update'
-    --'cases'
-    --'deaths'
-    --'recovered'
-    Arguments:
-        country_alpha2 {String-length=2} -- alpha2 of queried country
-    """
-    baseurl = mlcovid_url+'timeline/'+alpha
-    country_name = get_country_from_alpha(alpha)
-    data = datacollect.get_json(baseurl, {})
-    with open('./data_rebase/country-timeline/'+alpha+'.csv', 'w', encoding='utf-8') as csv_file:
-        field_names = ['country', 'name', 'cases',
-                       'deaths', 'recovered', 'last_update']
-        writer = csv.DictWriter(
-            csv_file, fieldnames=field_names, extrasaction='ignore')
-        writer.writeheader()
-        for day in data[::-1]:
-            day['name'] = country_name
-            writer.writerow(day)
-    print('cluster timeline ' +
-          country_name + ": OK")
 
 
 def get_data_last_update_api():
@@ -166,7 +201,7 @@ def get_data_last_update_api():
     return time_api
 
 
-def get_data_last_update_sql():
+def get_data_last_update_sql(local):
     """Function to fetch the last update time of 
     a country given its alpha code from Postgres
     this function is country specific [US]
@@ -178,12 +213,15 @@ def get_data_last_update_sql():
     """
     sql_query = "SELECT last_update FROM live_status WHERE alpha2 = 'US'"
     try:
-        db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
-                                   user=tuser, password=tpw)
+        if local:
+            db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
+                                       user=tuser, password=tpw)
+        else:
+            db_conn = psycopg2.connect(database_url, sslmode='require')
         db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT version();")
+        db_cursor.execute("SELECT current_database();")
         record = db_cursor.fetchone()
-        print("You are connected to - ", record, "\n")
+        print("You are connected to - ", record[0], "\n")
         db_cursor.execute(sql_query)
         db_conn.commit()
         return db_cursor.fetchone()[0]
@@ -219,23 +257,26 @@ def get_country_timeline(alpha):
           alpha + ": OK")
 
 
-def sql_retrieve_all_status():
+def sql_retrieve_all_status(local):
     """
     `row` format:{'country': 'PR', 'last_update': '2020-03-17T16:13:14', 'cases': 0, 'deaths': 0, 'recovered': 0, 'name': 'Puerto Rico'}
     """
     baseurl = mlcovid_url+'status'
     data = datacollect.get_json(baseurl, {})
     try:
-        db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
-                                   user=tuser, password=tpw)
+        if local:
+            db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
+                                       user=tuser, password=tpw)
+        else:
+            db_conn = psycopg2.connect(database_url, sslmode='require')
         db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT version();")
+        db_cursor.execute("SELECT current_database();")
         record = db_cursor.fetchone()
-        print("You are connected to - ", record)
+        print("You are connected to - ", record[0], "\n")
 
         sql_query = 'INSERT INTO live_status VALUES(%s, %s, %s, %s, %s, %s)'
         for row in data:
-            row['name'] = get_country_from_alpha(row['country'])[0]
+            row['name'] = get_country_from_alpha(row['country'], local)[0]
             db_cursor.execute(sql_query, (row['country'], row['name'], row['cases'],
                                           row['deaths'], row['recovered'], row['last_update']))
             db_conn.commit()
@@ -248,17 +289,19 @@ def sql_retrieve_all_status():
             print("PostgreSQL connection is closed")
 
 
-def sql_update_all_status():
+def sql_update_all_status(local):
     baseurl = mlcovid_url+'status'
     data = datacollect.get_json(baseurl, {})
     try:
-        db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
-                                   user=tuser, password=tpw)
-        db_conn.autocommit = True
+        if local:
+            db_conn = psycopg2.connect(host=thost, port=tport, dbname=tdbname,
+                                       user=tuser, password=tpw)
+        else:
+            db_conn = psycopg2.connect(database_url, sslmode='require')
         db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT version();")
+        db_cursor.execute("SELECT current_database();")
         record = db_cursor.fetchone()
-        print("You are connected to - ", record)
+        print("You are connected to - ", record[0], "\n")
 
         sql_query = '''UPDATE live_status
                         SET cases = %s,
