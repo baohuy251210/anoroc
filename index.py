@@ -1,3 +1,4 @@
+import visdcc
 import database
 import psycopg2
 import figure
@@ -9,6 +10,7 @@ import os
 from dash.dependencies import Input, Output, State
 import controller
 from app import app
+
 
 '''
 -----------------------
@@ -46,16 +48,11 @@ page_header = html.Div(className='columns bg-gray', children=[
         ], style={'fontWeight': '600', 'paddingLeft': '50px', 'paddingRight': '50px'})  # navbar style
     ])
 ])
-
-page_toasts_news = html.Div(className='toast toast-primary', children=[
-    html.Button(className='btn btn-clear float-right'),
-    "Welcome to Anoroc Explorer! ",
-    "Check the github page for news"
-])
-page_modal_news = html.Div(className='modal modal-sm active', children=[
-    html.Div(className='modal-container', children=[
+page_modal_news = html.Div(id='modal-main', className='modal modal-sm active', children=[
+    html.Div(id='modal-container', className='modal-container', children=[
         html.Div(className='modal-header', children=[
-            html.A(href='#close', className='btn btn-clear float-right'),
+            html.A(id='modal-news-close', href='#',
+                   className='btn btn-clear float-right'),
             html.Div(className='modal-title h5',
                      children=['Welcome to Anoroc Explorer 1.0'])
         ]),
@@ -66,15 +63,79 @@ page_modal_news = html.Div(className='modal modal-sm active', children=[
     ])
 ])
 
+column_select = html.Div(className='card', children=[
+    html.Div(className='card-header', children=[
+        html.Div('COVID Data Explorer', className='card-title h4 text-left'),
+        html.Div("Watch the trends",
+                 className='card-subtitle text-gray text-left'),
+    ]),
+    html.Div(className='card-body m-2', children=[
+        "Select Country:",
+        controller.generate_dropdown(),
+        html.Div(className='divider'),
+        dcc.Checklist(id='show-checklist',
+                      options=[
+                          {'label': ' Show Infected ', 'value': 'infected'},
+                          {'label': ' Show Deaths ', 'value': 'deaths'},
+                          {'label': ' Show Recovered ', 'value': 'recovered'}
+                      ],
+                      value=['infected', 'deaths', 'recovered'],
+                      #   className='form-group',
+                      labelStyle={'display': 'block',
+                                  'marginBottom': '.4rem'},
+
+                      )
+    ]),
+    html.Div(className='card-footer m-2', children=[
+        html.Button('Submit', className='btn btn-primary',
+                    id='country-dropdown-submit')
+    ])
+])
+
+column_data = html.Div(id='dropdown-output-container', className='card', children=[
+    html.Div(id='dropdown-output-header', className='card-header h4', children=[
+    ]),
+    html.Div(id='dropdown-output-body', className='card-body text-secondary', children=[
+    ])
+])
+
+html_linebreak = html.Div(className='columns', children=[])
+
+
+def html_div_right(div_children):
+    return html.Div(className='container', children=[
+        html.Div(className='columns', children=[
+            html.Div(className='column col-3 col-ml-auto', children=[
+                    div_children
+                    ])
+        ])
+    ])
+
+
+def html_div_select_country(column1, column2):
+    return html.Div(className='columns m-2 py-2', children=[
+        html.Div(className='column col-4', children=[
+            column1,
+        ]),
+        html.Div(className='column col-8', children=[
+            column2,
+        ])
+    ])
+
+
 """
 -----------------------
 App.py layouts part
 """
 
 app.layout = \
-    html.Div(id='container', className='container',
+    html.Div(id='app-layout', className='container bg-gray',
              children=[page_header,
-
+                       #    page_toasts_news,
+                       #    modal,
+                       page_modal_news,
+                       html_div_select_country(
+                           column_select, column_data),
                        ], style={
                  'verticalAlign': 'middle',
                  'textAlign': 'center',
@@ -85,6 +146,31 @@ app.layout = \
                  'left': '0px',
              }
              )
+
+'''
+DASH cannot load js correctly so...
+-------------
+LAYOUT callbacks (Design):
+'''
+
+
+@app.callback(
+    [Output("modal-container", "style"),
+     Output('modal-main', 'className')],
+    [Input("modal-news-close", "n_clicks")],
+    [State("modal-container", "style")]
+)
+def close_modal(n_clicks, prop):
+    if (prop == None):
+        return {'display': 'block'}, 'modal modal-sm active'
+    else:
+        return {'display': 'none'}, 'modal modal-sm'
+
+
+js_string = """this.document.getElementById('toasts-btn-close').onclick = function() {
+        this.document.getElementById('toasts-news').style.display = "none";
+        console.log("btn toasts clicked");
+        """
 
 
 '''

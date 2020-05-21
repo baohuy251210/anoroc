@@ -16,15 +16,54 @@ from app import app
 database_local_status = True
 df_country_index = database.get_df_country_index(database_local_status)
 
+dict_alpha_name = pd.read_csv('./data_rebase/country_alpha_index.csv',
+                              index_col='alpha2', keep_default_na=False, na_values=['__'], encoding='utf-8').to_dict('index')
+
+
+def generate_dropdown():
+    dframe = df_country_index
+    lst = []
+    for i in range(len(dframe)):
+        lst.append({'label': dframe.iloc[i][1]+', '+dframe.iloc[i][0],
+                    'value': dframe.iloc[i][0]})
+    return dcc.Dropdown(
+        id='country-dropdown',
+        options=lst,
+        placeholder="Select",
+        clearable=False,
+        searchable=True,
+        value=dframe.iloc[-8][0],
+    )
+
 
 @app.callback(
-    Output('dropdown-output', 'children'),
-    [Input('country-dropdown', 'value')])
-def update_output_sql(value):
+    [Output('dropdown-output-header', 'children'),
+     Output('dropdown-output-body', 'children'),
+     Output('dropdown-output-container', 'className')],
+    [Input('country-dropdown-submit', 'n_clicks')],
+    [State('country-dropdown', 'value'),
+     State('show-checklist', 'value'),
+     State('dropdown-output-container', 'className')
+     ]
+)
+def country_select(n_clicks, country_alpha, checklist, card_class):
+    if (n_clicks == None):
+        return None, None, str(card_class)+' d-hide'
+    return dict_alpha_name[country_alpha]['name'], generate_country_charts(country_alpha), str(card_class).replace(' d-hide', '')
+
+# @app.callback(
+#     Output('dropdown-output', 'children'),
+#     [Input('country-dropdown', 'value')])
+
+
+def generate_country_charts(value):
     """Input- value: country's alpha
     Arguments:
         value {[type]} -- [description]
     """
+    print("dropdown")
+    if (value == None):
+        return "Not done"
     country_name = database.get_country_from_alpha(
         value, database_local_status)[1]
 
@@ -37,27 +76,9 @@ def update_output_sql(value):
 
     fig = figure.fig_line_chart(
         country_name, database.get_country_timeline(value))
-    return html.Div([dash_table.DataTable(
-        id='selected',
-        columns=[{'name': i, 'id': i} for i in df_selected_country.columns],
-        style_cell={
-            'whitespace': 'normal',
-            'minWidth': '130px', 'width': '130px', 'maxWidth': '130px',
-            'fontSize': 15,
-            'textAlign': 'center',
-            'color': 'rgba(0,0,0,0.87)',
-            'fontFamily': 'Jost'
-        },
-        style_cell_conditional=[
-            {'if': {'column_id': 'Country'},
-             'width': '23%'},
-            {'if': {'column_id': 'Infected'},
-             'width': '10%'},
-
-        ],
-        data=df_selected_country.to_dict('records')
-    ),
-        dcc.Graph(figure=fig, style={'marginTop': '25px', 'width': '100%'})
+    return html.Div([
+        dcc.Graph(figure=fig, style={'marginTop': '25px', 'width': '100%',
+                                     'fontFamily': 'Roboto Mono', })
     ]
     )
 
@@ -113,33 +134,4 @@ def generate_live_table(n_clicks):
              'width': '20%'},
         ],
 
-    )
-
-
-def generate_dropdown(dframe):
-    lst = []
-    for i in range(len(dframe)):
-        lst.append({'label': dframe.iloc[i][1]+', '+dframe.iloc[i][0],
-                    'value': dframe.iloc[i][0]})
-
-    # print(lst)
-    return dcc.Dropdown(
-        id='country-dropdown',
-        options=lst,
-        placeholder="Select country to inspect",
-        clearable=False,
-        searchable=True,
-        value=dframe.iloc[-8][0],  # value = 'us'
-        style={
-            'fontFamily': 'Jost',
-            'display': 'inline-block',
-            'textAlign': 'center',
-            'fontStyle': 'bold',
-            'margin': '0 auto',
-            'color': 'rgba(0,0,0,0.6)',
-            'width': '40%',
-            'position': 'relative',
-            'verticalAlign': 'middle',
-            # 'fontFamily': 'Roboto',
-        }
     )

@@ -21,12 +21,7 @@ def fig_line_chart(value, df_country):
     df_country['newcases'] = df_country['cases'].diff(-1)
     df_country['newrecovered'] = df_country['recovered'].diff(-1)
     df_country['newdeaths'] = df_country['deaths'].diff(-1)
-    fig = make_subplots(rows=2, cols=1,
-                        subplot_titles=('Total Confirmed', 'Daily Confirmed'
-                                        ),
-                        row_heights=[0.5, 0.5],
-                        shared_xaxes=True,
-                        vertical_spacing=0.3
+    fig = make_subplots(rows=1, cols=2,
                         )
     fig.add_trace(go.Scatter(x=df_country['last_update'],
                              y=df_country['cases'],
@@ -57,70 +52,48 @@ def fig_line_chart(value, df_country):
                              mode='lines',
                              legendgroup='infected',
                              name='Infected - Daily',
-                             line=dict(color='tomato', width=1.5)),
-                  row=2, col=1
+                             line=dict(color='tomato', width=1.5),
+                             showlegend=False),
+                  row=1, col=2,
+
                   )
     fig.add_trace(go.Scatter(x=df_country['last_update'],
                              y=df_country['newrecovered'],
                              mode='lines',
                              legendgroup='recovered',
                              name='Recovered - Daily',
-                             line=dict(color='forestgreen', width=1.5)),
-                  row=2, col=1
+                             line=dict(color='forestgreen', width=1.5),
+                             showlegend=False),
+                  row=1, col=2,
                   )
     fig.add_trace(go.Scatter(x=df_country['last_update'],
                              y=df_country['newdeaths'],
                              mode='lines',
                              legendgroup='deceased',
                              name='Deceased - Daily',
-                             line=dict(color='firebrick', width=1.5)),
-                  row=2, col=1
+                             line=dict(color='firebrick', width=1.5),
+                             showlegend=False),
+                  row=1, col=2,
                   )
     # fig.update_traces(hoverinfo='x+y', stackgroup='one')
     fig.update_layout(hovermode='x', autosize=True,
-                      height=800,
+                      legend=dict(x=0.4, y=-0.7),
+                      showlegend=True,
                       font=dict(
-                          family="Jost",
-                          size=12,
+                          family='Roboto Slab, serif',
+                          size=14,
                           color="#000000"
                       ),
-                      title={
-                          'text': value+': Reported Infected, Deaths and Recovered',
-                          'y': 0.95,
-                          'x': 0.5,
-                          'xanchor': 'center',
-                          'yanchor': 'top'},
+                      legend_orientation='h',
                       xaxis_title='Timeline',
                       yaxis_title='Reported Counts',
                       xaxis_range=[datetime.datetime(2020, 4, 10),
                                    datetime.datetime(2020, 5, 20)],
                       yaxis=dict(autorange=True, fixedrange=False),
-                      xaxis_rangeslider_visible=True, xaxis_rangeslider_thickness=0.05
+                      xaxis_rangeslider_visible=True, xaxis_rangeslider_thickness=0.05,
                       )
-
-    fig.update_layout(hovermode='x', autosize=True,
-                      height=800,
-                      font=dict(
-                          family="Jost",
-                          size=12,
-                          color="#000000"
-                      ),
-                      title={
-                          'text': value+': Reported Infected, Deaths and Recovered',
-                          'y': 0.95,
-                          'x': 0.2,
-                          'xanchor': 'center',
-                          'yanchor': 'top'},
-                      xaxis_title='Timeline',
-                      yaxis_title='Reported Counts',
-                      xaxis_range=[datetime.datetime(2020, 4, 10),
-                                   datetime.datetime(2020, 5, 20)],
-                      yaxis=dict(autorange=True, fixedrange=False),
-                      xaxis_rangeslider_visible=True, xaxis_rangeslider_thickness=0.1
-                      )
-
     fig.update_xaxes(
-        # rangeslider_visible=True,
+        rangeslider_visible=True,
         rangeselector=dict(
             buttons=list([
                 dict(count=7, label="7d", step="day",
@@ -135,5 +108,5 @@ def fig_line_chart(value, df_country):
             ]),
 
         ))
-    fig.update_yaxes(nticks=10)
+    fig.update_yaxes(nticks=6)
     return fig
