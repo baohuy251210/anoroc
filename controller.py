@@ -13,7 +13,7 @@ import database
 import pandas as pd
 
 from app import app
-database_local_status = False
+database_local_status = True
 df_country_index = database.get_df_country_index(database_local_status)
 
 

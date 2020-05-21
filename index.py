@@ -9,20 +9,13 @@ import os
 from dash.dependencies import Input, Output, State
 import controller
 from app import app
-'''
-Version 0.5 TODO:
-    *offline css file (not codepen.io) [x]
-    *fix curacao and cote divoire name [x]
-    *heroku scheduler [ ]
-    *retouch css, bootstrap [ ]
-'''
 
 '''
 -----------------------
 Data Frame (pandas) Stuff
 '''
 
-data_updated_time = 'version test'
+data_updated_time = 'version test1'
 '''
 -----------------------
 LAYOUT:
@@ -46,84 +39,46 @@ tabs = html.Div(
 App.py layouts part
 """
 
-app.layout = html.Div(id='container', className='parent',
-                      children=[
-                          html.H1(children='ANOROC - Live Covid19 Monitor',
-                                  style={
-                                      'marginBottom': '5px',
-                                      'marginTop': '12px',
-                                      'verticalAlign': 'center',
-                                      'textAlign': 'center'
-                                  },
-                                  ),
-                          html.H6(['last updated from anoroc: '+str(data_updated_time)+'(GMT +0)'],
-                                  style={
-                              'textAlign': 'right',
-                                      'fontSize': '13px',
-                                      'fontFamily': 'Arvo',
-                                      'fontStyle': 'italic',
-                                      'marginTop': '1px',
-                                      'paddingRight': '250px',
-                          }),
-                          html.H6([html.A("Version 0.3 Changelog", href='https://github.com/baohuy251210/anoroc')],
-                                  style={
-                                      'textAlign': 'right',
-                                      'fontSize': '13px',
-                                      'fontFamily': 'Arvo',
-                                      'fontStyle': 'italic',
-                                      'marginTop': '1px',
-                                      'paddingRight': '250px',
-                          },
+app.layout = \
+    html.Div(id='container', className='container',
+             children=[
+                 html.Div(className='columns bg-gray', children=[
+                     html.Div(className='column col-12', children=[
+                         html.Header(className='navbar', children=[
+                             html.Section(className='navbar-section', children=[
+                                 html.A('Real-time Map', href='https://coronavirus.jhu.edu/map.html',
+                                        className='btn btn-link'),
+                                 html.A('COVID-19 API', href='https://covid19-api.org/',
+                                        className='btn btn-link', style={'paddingLeft': '40px'})
+                             ]),  # navbar sec 1
+                             html.Section(className='navbar-center', children=[
+                                 html.Img(
+                                     src='/assets/logo-brand.png', style={'height': '80px'})
+                             ]),
+                             html.Section(className='navbar-section', children=[
+                                 html.A(
+                                     'View Changelogs and Code on', href='https://github.com/baohuy251210/anoroc', className='btn btn-link'),
+                                 html.A(href='https://github.com/baohuy251210/anoroc', children=[
+                                     html.Img(
+                                        src='/assets/GitHub_Logo.png', style={'height': '32px'}),
+                                 ])
 
-                          ),
-                          html.H6(children="Historical data for graphs is updated every 24 hours",
-                                  style={
-                                      'textAlign': 'right',
-                                      'fontSize': '13px',
-                                      'fontStyle': 'italic',
-                                      'marginBot': '14px',
-                                      'paddingRight': '250px',
-                                      'fontFamily': 'Roboto Condensed'
-                                  },
-                                  ),
-                          html.Br(),
-                          tabs,
-
-                          html.Footer(["Data is sourced from ",
-                                       html.A('John Hopkins CSSE',
-                                              href='https://github.com/CSSEGISandData/COVID-19', style={'color': '#ffdc65'}),
-                                       html.Br(),
-                                       " updated from a free ",
-                                       html.A('COVID19-API',
-                                              href='https://covid19-api.org/', style={'color': '#ffdc65'}),
-                                       html.Br(),
-                                       "A tracker monitor for COVID-19, Created by ",
-                                       html.A("baohuy251210@Github/Anoroc",
-                                              href='https://github.com/baohuy251210/anoroc', style={'color': '#ffdc65'}),
-                                       html.Br(),
-                                       "More improvements will be added :)"
+                             ])
+                         ], style={'fontWeight': '600', 'paddingLeft': '50px', 'paddingRight': '50px'})  # navbar style
+                     ])
+                 ])
 
 
-                                       ],
-                                      style={
-                              #   'fontStyle': 'italic',
-                              'marginTop': '30px',
-                              'color': '#FFFFFF',
-                              'backgroundColor': '#344955',
-                              'fontFamily': 'Roboto Condensed',
-                              'fontWeight': '400'
-                          })
-                      ], style={
-                          'borderTop': '30px solid #344955',
-                          'verticalAlign': 'middle',
-                          'textAlign': 'center',
-                          'position': 'absolute',
-                          'width': '100%',
-                          'height': '100%',
-                          'top': '0px',
-                          'left': '0px',
-                      }
-                      )
+             ], style={
+                 'verticalAlign': 'middle',
+                 'textAlign': 'center',
+                 'position': 'absolute',
+                 'width': '100%',
+                 'height': '100%',
+                 'top': '0px',
+                 'left': '0px',
+             }
+             )
 
 
 '''
