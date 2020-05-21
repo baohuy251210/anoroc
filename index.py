@@ -35,7 +35,7 @@ tabs = html.Div(
                 dbc.Tab(label="Select Country", tab_id="tab_select"),
             ],
             id='tabs',
-            active_tab="tab_select",
+            active_tab="tab_live",
         ),
         html.Div(id='content'),
     ]
@@ -141,8 +141,9 @@ tab_live_content = dbc.Card(
                 'verticalAlign': 'center',
                 'margin': '10px auto',
                 'overflow': 'auto',
-                'height': '75%',
-                'width': '75%'
+                'width': '80%',
+                'padding': '27px',
+                'fontFamily': 'Roboto',
             }),
         ]
     ),
@@ -161,7 +162,8 @@ tab_select_content = dbc.Card(
                                        'overflow': 'auto',
                                        'textAlign': 'center',
                                        'verticalAlign': 'center',
-                                       'display': 'inline-block'
+                                       'display': 'inline-block',
+                                       'padding': '20px',
                      }),
         ]
     ),

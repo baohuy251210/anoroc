@@ -26,7 +26,7 @@ def sql_test_conn(local):
         db_cursor = db_conn.cursor()
         db_cursor.execute("SELECT current_database();")
         record = db_cursor.fetchone()
-        print("You are connected to - ", record[0], "\n")
+        print("You are connected to - ", record[0])
         db_conn.commit()
         return record
     except (Exception, psycopg2.Error) as error:
@@ -48,9 +48,6 @@ def load_country(local):
         else:
             db_conn = psycopg2.connect(database_url, sslmode='require')
         db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT current_database();")
-        record = db_cursor.fetchone()
-        print("You are connected to - ", record[0], "\n")
         with open('./data_rebase/country_alpha_index.csv', 'r', encoding='utf-8') as csv_file:
             reader = csv.DictReader(csv_file)
             for row in reader:
@@ -80,9 +77,6 @@ def get_country_from_name(country_name, local):
         else:
             db_conn = psycopg2.connect(database_url, sslmode='require')
         db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT current_database();")
-        record = db_cursor.fetchone()
-        print("You are connected to - ", record[0], "\n")
         db_cursor.execute(sql_query, (country_name,))
         record = db_cursor.fetchone()
         db_conn.commit()
@@ -109,9 +103,6 @@ def get_country_from_alpha(country_alpha, local):
         else:
             db_conn = psycopg2.connect(database_url, sslmode='require')
         db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT current_database();")
-        record = db_cursor.fetchone()
-        print("You are connected to - ", record[0], "\n")
         db_cursor.execute(sql_query, (country_alpha,))
         record = db_cursor.fetchone()
         db_conn.commit()
@@ -134,9 +125,6 @@ def get_df_country_index(local):
         else:
             db_conn = psycopg2.connect(database_url, sslmode='require')
         db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT current_database();")
-        record = db_cursor.fetchone()
-        print("You are connected to - ", record[0], "\n")
         db_cursor.execute(sql_query)
         df_country_index = pd.read_sql(sql_query, db_conn)
         db_conn.commit()
@@ -167,9 +155,6 @@ def get_country_status(alpha, local):
         else:
             db_conn = psycopg2.connect(database_url, sslmode='require')
         db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT current_database();")
-        record = db_cursor.fetchone()
-        print("You are connected to - ", record[0], "\n")
         df_selected = pd.read_sql(sql_query, db_conn, params=(alpha,))
         db_conn.commit()
         return df_selected
@@ -199,9 +184,6 @@ def get_df_all_country_status(local):
         else:
             db_conn = psycopg2.connect(database_url, sslmode='require')
         db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT current_database();")
-        record = db_cursor.fetchone()
-        print("You are connected to - ", record[0], "\n")
         df_selected = pd.read_sql(sql_query, db_conn)
         db_conn.commit()
         return df_selected
@@ -249,9 +231,6 @@ def get_data_last_update_sql(local):
         else:
             db_conn = psycopg2.connect(database_url, sslmode='require')
         db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT current_database();")
-        record = db_cursor.fetchone()
-        print("You are connected to - ", record[0], "\n")
         db_cursor.execute(sql_query)
         db_conn.commit()
         return db_cursor.fetchone()[0]
@@ -300,10 +279,6 @@ def sql_retrieve_all_status(local):
         else:
             db_conn = psycopg2.connect(database_url, sslmode='require')
         db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT current_database();")
-        record = db_cursor.fetchone()
-        print("You are connected to - ", record[0], "\n")
-
         sql_query = 'INSERT INTO live_status VALUES(%s, %s, %s, %s, %s, %s)'
         for row in data:
             row['name'] = get_country_from_alpha(row['country'], local)[1]
@@ -329,10 +304,6 @@ def sql_update_all_status(local):
         else:
             db_conn = psycopg2.connect(database_url, sslmode='require')
         db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT current_database();")
-        record = db_cursor.fetchone()
-        print("You are connected to - ", record[0], "\n")
-
         sql_query = '''UPDATE live_status
                         SET cases = %s,
                         name = %s,

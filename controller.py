@@ -27,7 +27,6 @@ def update_output_sql(value):
     """
     country_name = database.get_country_from_alpha(
         value, database_local_status)[1]
-    print("##", country_name)
 
     df_selected_country = database.get_country_status(
         value, database_local_status).drop(columns='alpha2')
@@ -73,20 +72,47 @@ def generate_live_table(n_clicks):
     """
     df = database.get_df_all_country_status(database_local_status)
     df = df.drop(columns='alpha2')
+    df['last_update'] = pd.to_datetime(df['last_update']).astype(str)
     df = df.rename(columns={"name": "Country", "cases": "Infected", 'deaths': 'Deaths', 'recovered': 'Recovered',
                             'last_update': 'Last Update GMT+0'})
+    df = df.sort_values('Infected', ascending=False)
     return dash_table.DataTable(
         id='live-table',
         columns=[
-            {'name': str(i).capitalize(), 'id': i, 'selectable': True} for i in df.columns
+            {'name': i, 'id': i} for i in df.columns
         ],
         data=df.to_dict('records'),
-        sort_action='native',
-        sort_mode='multi',
-        page_current=0,
-        page_action='native',
-        page_size=10,
-        style_as_list_view=True,
+        style_table={'height': 'auto', 'margin': 'auto',
+                     'overflowY': 'auto', 'overflowX': 'hidden'},
+        page_action="native",
+        page_size=20,
+
+        # style_as_list_view=True,
+
+        style_cell={
+            'whitespace': 'normal',
+            'minWidth': '150px', 'width': '150px', 'maxWidth': '150px',
+            'fontSize': 15,
+            'textAlign': 'center',
+            'color': 'rgba(0,0,0,0.87)',
+            'fontFamily': 'Jost',
+            'paddingLeft': '0px',
+            'paddingRight': '0px',
+
+        },
+        style_cell_conditional=[
+            {'if': {'column_id': 'Country'},
+             'width': '35%', 'textAlign': 'left', 'paddingLeft': '20px', },
+            {'if': {'column_id': 'Last Update GMT+0'},
+             'paddingRight': '20px',
+             'width': '20%'},
+        ],
+        style_data_conditional=[
+            {'if': {'column_id': 'Last Update GMT+0'},
+                'fontSize': 11, 'paddingRight': '20px',
+             'width': '20%'},
+        ],
+
     )
 
 
