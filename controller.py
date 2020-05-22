@@ -35,16 +35,18 @@ def generate_dropdown():
 
 
 @app.callback(
-    [Output('dropdown-output-header', 'children'),
+    [Output('dropdown-output-container', 'className'),
+        Output('dropdown-output-header', 'children'),
      Output('dropdown-output-body', 'children'),
-     Output('dropdown-output-container', 'className')],
-    [Input('country-dropdown-submit', 'n_clicks')],
+     ],
+    [Input('country-dropdown-submit', 'n_clicks'),
+     Input('country-dropdown-watch', 'n_clicks')],
     [State('country-dropdown', 'value'),
      State('show-checklist', 'value'),
-     State('dropdown-output-container', 'className')
+     State('dropdown-output-container', 'className'),
      ]
 )
-def country_select(n_clicks, alpha, checklist, card_class):
+def country_select(submit_clicks, watch_clicks, alpha, checklist, card_class):
     """Handle submit button from country-select
 
     Arguments:
@@ -54,24 +56,23 @@ def country_select(n_clicks, alpha, checklist, card_class):
         card_class {[type]} -- [description]
 
     Returns:
+        set card to visible
         Country name -- card header (html friendly)
         country data -- card body (html friendly)
         loader graph -- figure
-        set card to visible
     """
-    if (n_clicks == None):
-        return None, None, str(card_class)
-    timeline_graph = generate_country_charts(alpha)
+    if (submit_clicks == None and watch_clicks == None):
+        return str(card_class), None, None
     status = database.get_country_live_status(alpha)
     card_body_div = generate_card_body(status)
-    return dict_alpha_name[alpha]['name'], card_body_div, str(card_class).replace(' d-hide', '')
+    return [str(card_class).replace(' d-invisible', ' d-visible'), dict_alpha_name[alpha]['name'], card_body_div]
 
 # @app.callback(
 #     Output('dropdown-output', 'children'),
 #     [Input('country-dropdown', 'value')])
 
 
-def generate_country_charts(value):
+def generate_country_charts(value, checklist):
     """Input- value: country's alpha
 
     Arguments:
@@ -80,15 +81,8 @@ def generate_country_charts(value):
     if (value == None):
         return "Not done"
     country_name = database.get_quick_country_name(value)
-
-    # df_selected_country = database.get_country_status(
-    #     value, database_local_status).drop(columns='alpha2')
-    # df_selected_country['name'] = df_selected_country['name'].apply(
-    #     lambda x: country_name)
-    # df_selected_country = df_selected_country.rename(columns={"name": "Country", "cases": "Infected", 'deaths': 'Deaths', 'recovered': 'Recovered',
-    #                                                           'last_update': 'Last Update GMT+0'})
     fig = figure.fig_line_chart(
-        country_name, database.get_quick_country_timeline(value))
+        country_name, database.get_quick_country_timeline(value), checklist)
     return dcc.Graph(figure=fig, style={'width': '100%', 'height': '100%',
                                         'fontFamily': 'Roboto Mono', })
 
@@ -164,8 +158,8 @@ def generate_card_body(status):
         Html.Div -- contains content for card-body
     """
     return html.Div(className='container', children=[
-        html.Div(className='h5 text-center my-2',
-                 children='Current status:'),
+        # html.Div(className='h5 text-center my-2',
+        #  children='Current status:'),
         html.Div(className='columns', children=[  # status cards
             html.Div(className='column col-3 col-mx-auto', children=[
                 html.Span(className='label label-primary', children=[
@@ -211,10 +205,23 @@ def generate_card_body(status):
 @app.callback(
     Output('graph-loader', 'children'),
     [Input('graph-btn-timeline', 'n_clicks')],
-    [State('country-dropdown', 'value')]
+    [State('country-dropdown', 'value'),
+     State('show-checklist', 'value')]
 )
-def generate_timeline_graph(btn_clicks, alpha):
+def generate_timeline_graph(btn_clicks, alpha, checklist):
+    """Generate timeline graph based on btn click
+
+    Arguments:
+        btn_clicks {[type]} -- [description]
+        alpha {[type]} -- [description]
+        checklist {[type]} -- [description]
+
+    Returns:
+        [type] -- [description]
+    """
     if (btn_clicks == None):
         return
+    elif len(checklist) == 0:
+        return html.Span(className='label label-error', children="Please choose at least one type")
     else:
-        return generate_country_charts(alpha)
+        return generate_country_charts(alpha, checklist)

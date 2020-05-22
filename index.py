@@ -33,12 +33,16 @@ page_header = html.Div(className='columns bg-gray', children=[
                                         className='btn btn-link', style={'paddingLeft': '40px'})
             ]),  # navbar sec 1
             html.Section(className='navbar-center', children=[
-                html.Img(
-                    src='/assets/logo-brand.png', style={'height': '70px'})
+
+                html.A(id='btn-home', href='#home', children=[
+                    html.Img(
+                        src='/assets/logo-brand.png', style={'height': '50px'})
+                ])
+
             ]),
             html.Section(className='navbar-section', children=[
                 html.A(
-                    'View Changelogs and Code on', href='https://github.com/baohuy251210/anoroc', className='btn btn-link'),
+                    'View Code on', href='https://github.com/baohuy251210/anoroc', className='btn'),
                 html.A(href='https://github.com/baohuy251210/anoroc', children=[
                     html.Img(
                         src='/assets/GitHub_Logo.png', style={'height': '32px'}),
@@ -63,16 +67,20 @@ page_modal_news = html.Div(id='modal-main', className='modal modal-sm active', c
     ])
 ])
 
-column_select = html.Div(id='dropdown-input-container', className='card d-hide', children=[
+
+column_select = html.Div(id='dropdown-input-container', className='card', children=[
     html.Div(className='card-header', children=[
-        html.Div('COVID Data Explorer', className='card-title h4 text-left'),
+        html.Div('COVID Data Explorer', className='card-title h3 text-left'),
         html.Div("Watch the trends",
                  className='card-subtitle text-gray text-left'),
     ]),
     html.Div(className='card-body m-2', children=[
-        "Select Country:",
+        html.Div(className='h6', children='Select country:'),
         controller.generate_dropdown(),
+        html.Button('Watch', className='btn btn-secondary m-2',
+                    id='country-dropdown-watch'),
         html.Div(className='divider'),
+        html.Div(className='h6', children='Select status type(s):'),
         dcc.Checklist(id='show-checklist',
                       options=[
                           {'label': ' Show Infected ', 'value': 'infected'},
@@ -93,8 +101,8 @@ column_select = html.Div(id='dropdown-input-container', className='card d-hide',
 ])
 
 column_data = \
-    html.Div(className='column col-12 col-auto', children=[
-        html.Div(id='dropdown-output-container', className='card d-hide text-dark', children=[
+    html.Div(className='column col-12 col-mx-auto', children=[
+        html.Div(id='dropdown-output-container', className='card text-dark d-invisible', children=[
 
             html.Div(id='dropdown-output-header', className='card-header h3', children=[
             ]),
@@ -105,24 +113,73 @@ column_data = \
     ])
 
 
-html_linebreak = html.Div(className='columns', children=[])
+div_hero =\
+    html.Div(id='hero-container', className='hero bg-gray section', children=[
+                html.H2('Anoroc Explorer', style={'marginBottom': '30px'}),
+                html.H5(['Monitor your updated ', html.U(
+                    'COVID-19'), ' Data within seconds'], style={'marginBottom': '30px'}, className='text-light text-dark'),
+                html.P([
+                    html.A(id='btn-start', className='btn btn-secondary btn-lg mr-2',
+                           href='#selector', children="Explore"),
+                    html.A(
+                        'Github', href='https://github.com/baohuy251210/anoroc', className='btn btn-primary btn-lg')
+                ]),
+        html.P(className='text-gray text-large', children=["Version 1.0"])
 
+    ])
 
-def html_div_right(div_children):
-    return html.Div(className='container', children=[
+div_introduction =\
+    html.Div(id='intro', className='section hero hero-sm text-center text-light bg-primary', children=[
+        html.H2('Introduction'),
         html.Div(className='columns', children=[
-            html.Div(className='column col-3 col-ml-auto', children=[
-                    div_children
-                    ])
-        ])
+            html.Div(className='column col-6 col-sm-12 col-mx-auto text-center', children=[
+                html.P(className='text-secondary', children=[
+                    html.Strong('Anoroc '),
+                    "is a Python Dash project created to monitor the daily updated data of multiple country",
+                    ". It's nothing really but my simple interest just to make this website :)",
+                ]),
+                html.P(className='text-secondary', children=[
+                    "Powered by ", html.Strong(
+                        'Dash, Plotly, Spectre CSS, Github and Heroku'),
+                ]),
+            ])
+        ]),
+        # cards ::>
+        html.Div(className='columns', children=[
+            html.Div(className='column col-3 col-xs-8 col-mx-auto text-dark', children=[
+                html.Div(className='card text-center', children=[
+                    html.Div(className='card-header h3',
+                             children='Up-to-date'),
+                    html.Div(
+                        className='card-body', children='Country status are updated every 2 hours, fetching data from JHU CSSE')
+                ], style={'padding': '0.5rem', 'border': '0'})
+            ]),
+            html.Div(className='column col-3 col-xs-8 col-mx-auto text-dark', children=[
+                html.Div(className='card text-center', children=[
+                    html.Div(className='card-header h3',
+                             children='Interactive'),
+                    html.Div(
+                        className='card-body', children='Allows searching country, interacting with graphs and data types')
+                ], style={'padding': '0.5rem', 'border': '0'})
+            ]),
+            html.Div(className='column col-3 col-xs-8 col-mx-auto text-dark', children=[
+                html.Div(className='card text-center', children=[
+                    html.Div(className='card-header h3',
+                             children='Speedy'),
+                    html.Div(
+                        className='card-body', children='To provide the best experiences, Anoroc prioritizes lightweight data loads')
+                ], style={'padding': '0.5rem', 'border': '0'})
+            ])
+        ], style={'marginLeft': '50px', 'marginRight': '50px'})
     ])
 
 
 def html_div_select_country(column1, column2):
+    print('select')
     return html.Div(className='columns m-2 py-2', children=[
         html.Div(className='column col-4', children=[
             column1,
-        ]),
+        ], style={'padding': '24px'}),
         html.Div(className='column col-8', children=[
             column2,
         ])
@@ -133,21 +190,20 @@ def html_div_select_country(column1, column2):
 -----------------------
 App.py layouts part
 """
+page_home_layout = html.Div([div_hero, div_introduction])
 
+page_country_select = html.Div(
+    [html_div_select_country(column_select, column_data)], style={'borderBottom': '30px'})
 app.layout = \
-    html.Div(id='app-layout', className='container bg-gray',
+    html.Div(id='app-layout', className='bg-gray',
              children=[page_header,
-                       #    page_toasts_news,
-                       #    modal,
-                       page_modal_news,
-                       html_div_select_country(
-                           column_select, column_data),
+                       dcc.Location(id='url', refresh=False),
+                       html.Div(id='page-content')
                        ], style={
                  'verticalAlign': 'middle',
                  'textAlign': 'center',
-                 'position': 'absolute',
                  'width': '100%',
-                 'height': '100%',
+                 'height': 'auto',
                  'top': '0px',
                  'left': '0px',
              }
@@ -172,13 +228,20 @@ def close_modal(n_clicks, prop, input_class):
     if (n_clicks == None):
         return {'display': 'block'}, 'modal modal-sm active', str(input_class)
     else:
-        return {'display': 'none'}, 'modal modal-sm', str(input_class).replace(' d-hide', '')
+        return {'display': 'none'}, 'modal modal-sm', str(input_class).replace(' d-invisible', '')
 
 
-js_string = """this.document.getElementById('toasts-btn-close').onclick = function() {
-        this.document.getElementById('toasts-news').style.display = "none";
-        console.log("btn toasts clicked");
-        """
+@app.callback(
+    Output('page-content', 'children'),
+    [Input('url', 'hash')]
+)
+def display_page(hash):
+    if hash == None:
+        return page_home_layout
+    elif hash == '#selector':
+        return page_country_select
+    else:
+        return page_home_layout
 
 
 '''
