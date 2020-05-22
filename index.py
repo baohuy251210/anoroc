@@ -63,7 +63,7 @@ page_modal_news = html.Div(id='modal-main', className='modal modal-sm active', c
     ])
 ])
 
-column_select = html.Div(className='card', children=[
+column_select = html.Div(id='dropdown-input-container', className='card d-hide', children=[
     html.Div(className='card-header', children=[
         html.Div('COVID Data Explorer', className='card-title h4 text-left'),
         html.Div("Watch the trends",
@@ -92,12 +92,18 @@ column_select = html.Div(className='card', children=[
     ])
 ])
 
-column_data = html.Div(id='dropdown-output-container', className='card', children=[
-    html.Div(id='dropdown-output-header', className='card-header h4', children=[
-    ]),
-    html.Div(id='dropdown-output-body', className='card-body text-secondary', children=[
+column_data = \
+    html.Div(className='column col-12 col-auto', children=[
+        html.Div(id='dropdown-output-container', className='card d-hide text-dark', children=[
+
+            html.Div(id='dropdown-output-header', className='card-header h3', children=[
+            ]),
+
+            html.Div(id='dropdown-output-body', className='card-body', children=[
+            ])
+        ])
     ])
-])
+
 
 html_linebreak = html.Div(className='columns', children=[])
 
@@ -156,15 +162,17 @@ LAYOUT callbacks (Design):
 
 @app.callback(
     [Output("modal-container", "style"),
-     Output('modal-main', 'className')],
+     Output('modal-main', 'className'),
+     Output('dropdown-input-container', 'className')],
     [Input("modal-news-close", "n_clicks")],
-    [State("modal-container", "style")]
+    [State("modal-container", "style"),
+     State('dropdown-input-container', 'className')]
 )
-def close_modal(n_clicks, prop):
-    if (prop == None):
-        return {'display': 'block'}, 'modal modal-sm active'
+def close_modal(n_clicks, prop, input_class):
+    if (n_clicks == None):
+        return {'display': 'block'}, 'modal modal-sm active', str(input_class)
     else:
-        return {'display': 'none'}, 'modal modal-sm'
+        return {'display': 'none'}, 'modal modal-sm', str(input_class).replace(' d-hide', '')
 
 
 js_string = """this.document.getElementById('toasts-btn-close').onclick = function() {

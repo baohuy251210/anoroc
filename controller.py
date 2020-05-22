@@ -11,13 +11,11 @@ import figure
 from dash.dependencies import Input, Output, State
 import database
 import pandas as pd
-
+import time
+from database import dict_alpha_name
 from app import app
 database_local_status = True
 df_country_index = database.get_df_country_index(database_local_status)
-
-dict_alpha_name = pd.read_csv('./data_rebase/country_alpha_index.csv',
-                              index_col='alpha2', keep_default_na=False, na_values=['__'], encoding='utf-8').to_dict('index')
 
 
 def generate_dropdown():
@@ -46,10 +44,27 @@ def generate_dropdown():
      State('dropdown-output-container', 'className')
      ]
 )
-def country_select(n_clicks, country_alpha, checklist, card_class):
+def country_select(n_clicks, alpha, checklist, card_class):
+    """Handle submit button from country-select
+
+    Arguments:
+        n_clicks {[type]} -- [description]
+        alpha {[type]} -- [description]
+        checklist {[type]} -- [description]
+        card_class {[type]} -- [description]
+
+    Returns:
+        Country name -- card header (html friendly)
+        country data -- card body (html friendly)
+        loader graph -- figure
+        set card to visible
+    """
     if (n_clicks == None):
-        return None, None, str(card_class)+' d-hide'
-    return dict_alpha_name[country_alpha]['name'], generate_country_charts(country_alpha), str(card_class).replace(' d-hide', '')
+        return None, None, str(card_class)
+    timeline_graph = generate_country_charts(alpha)
+    status = database.get_country_live_status(alpha)
+    card_body_div = generate_card_body(status)
+    return dict_alpha_name[alpha]['name'], card_body_div, str(card_class).replace(' d-hide', '')
 
 # @app.callback(
 #     Output('dropdown-output', 'children'),
@@ -58,29 +73,24 @@ def country_select(n_clicks, country_alpha, checklist, card_class):
 
 def generate_country_charts(value):
     """Input- value: country's alpha
+
     Arguments:
-        value {[type]} -- [description]
+        value {dcc.graph} -- a dcc graph showing timeline of the country
     """
-    print("dropdown")
     if (value == None):
         return "Not done"
-    country_name = database.get_country_from_alpha(
-        value, database_local_status)[1]
+    country_name = database.get_quick_country_name(value)
 
-    df_selected_country = database.get_country_status(
-        value, database_local_status).drop(columns='alpha2')
-    df_selected_country['name'] = df_selected_country['name'].apply(
-        lambda x: country_name)
-    df_selected_country = df_selected_country.rename(columns={"name": "Country", "cases": "Infected", 'deaths': 'Deaths', 'recovered': 'Recovered',
-                                                              'last_update': 'Last Update GMT+0'})
-
+    # df_selected_country = database.get_country_status(
+    #     value, database_local_status).drop(columns='alpha2')
+    # df_selected_country['name'] = df_selected_country['name'].apply(
+    #     lambda x: country_name)
+    # df_selected_country = df_selected_country.rename(columns={"name": "Country", "cases": "Infected", 'deaths': 'Deaths', 'recovered': 'Recovered',
+    #                                                           'last_update': 'Last Update GMT+0'})
     fig = figure.fig_line_chart(
-        country_name, database.get_country_timeline(value))
-    return html.Div([
-        dcc.Graph(figure=fig, style={'marginTop': '25px', 'width': '100%',
-                                     'fontFamily': 'Roboto Mono', })
-    ]
-    )
+        country_name, database.get_quick_country_timeline(value))
+    return dcc.Graph(figure=fig, style={'width': '100%', 'height': '100%',
+                                        'fontFamily': 'Roboto Mono', })
 
 
 @app.callback(
@@ -135,3 +145,76 @@ def generate_live_table(n_clicks):
         ],
 
     )
+
+
+'''
+Layout generator for controller:
+
+'''
+
+
+def generate_card_body(status):
+    """Generate a container for selected country card
+
+    Arguments:
+        status {Tuple} -- (cases, deaths, recovered)
+        graph {dcc.Graph} -- timeline graph
+
+    Returns:
+        Html.Div -- contains content for card-body
+    """
+    return html.Div(className='container', children=[
+        html.Div(className='h5 text-center my-2',
+                 children='Current status:'),
+        html.Div(className='columns', children=[  # status cards
+            html.Div(className='column col-3 col-mx-auto', children=[
+                html.Span(className='label label-primary', children=[
+                    "Infected:"
+                ]),
+                html.Span(className='label label-secondary', children=[
+                    status[0]
+                ])
+            ]),
+            html.Div(className='divider-vert'),
+            html.Div(className='column col-3 col-mx-auto', children=[
+                html.Span(className='label label-primary', children=[
+                    "Deceased:"
+                ]),
+                html.Span(className='label label-secondary', children=[
+                    status[1]
+                ])
+            ]),
+            html.Div(className='divider-vert'),
+            html.Div(className='column col-3 col-mx-auto', children=[
+                html.Span(className='label label-primary', children=[
+                    "Recovered:"
+                ]),
+                html.Span(className='label label-secondary', children=[
+                    status[2]
+                ])
+            ]),
+        ]),
+        html.Div(className='divider'),
+        html.Button(id='graph-btn-timeline', className='btn btn-primary', children=[
+            'Timeline'
+        ]),
+        html.Div(className='columns', children=[  # charts
+            html.Div(className='column col-12', children=[
+                dcc.Loading(id='graph-loader', type='circle', color='#5755d9', style={'paddingTop': '50px'}, children=[
+
+                ])
+            ])
+        ]),
+    ], style={'fontFamily': 'Roboto Slab'})
+
+
+@app.callback(
+    Output('graph-loader', 'children'),
+    [Input('graph-btn-timeline', 'n_clicks')],
+    [State('country-dropdown', 'value')]
+)
+def generate_timeline_graph(btn_clicks, alpha):
+    if (btn_clicks == None):
+        return
+    else:
+        return generate_country_charts(alpha)

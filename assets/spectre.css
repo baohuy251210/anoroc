@@ -3533,7 +3533,7 @@ a.text-error:visited {
 }
 
 .loading::after {
-    animation: loading 500ms infinite linear;
+    animation: loading 1s infinite linear;
     border: .1rem solid #5755d9;
     border-radius: 50%;
     border-right-color: transparent;

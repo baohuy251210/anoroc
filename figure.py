@@ -8,8 +8,8 @@ import datetime
 
 
 def fig_line_chart(value, df_country):
-    """Take pandas.dataframe - timeline of a country 
-    and generate line charts of total and daily 
+    """Take pandas.dataframe - timeline of a country
+    and generate line charts of total and daily
     by timeline.
     Arguments:
         value {str} -- [country's name]
@@ -18,9 +18,9 @@ def fig_line_chart(value, df_country):
         plotly.graph_objects.Figure -- Desired subplots
     """
     fig = go.Figure()
-    df_country['newcases'] = df_country['cases'].diff(-1)
-    df_country['newrecovered'] = df_country['recovered'].diff(-1)
-    df_country['newdeaths'] = df_country['deaths'].diff(-1)
+    df_country['newcases'] = df_country['cases'].diff(1)
+    df_country['newrecovered'] = df_country['recovered'].diff(1)
+    df_country['newdeaths'] = df_country['deaths'].diff(1)
     fig = make_subplots(rows=1, cols=2,
                         )
     fig.add_trace(go.Scatter(x=df_country['last_update'],
@@ -77,6 +77,12 @@ def fig_line_chart(value, df_country):
                   )
     # fig.update_traces(hoverinfo='x+y', stackgroup='one')
     fig.update_layout(hovermode='x', autosize=True,
+                      title={
+                          'text': "Confirmed cases from day one",
+                          'y': 0.95,
+                          'x': 0.5,
+                          'xanchor': 'center',
+                          'yanchor': 'top'},
                       legend=dict(x=0.4, y=-0.7),
                       showlegend=True,
                       font=dict(
@@ -87,10 +93,8 @@ def fig_line_chart(value, df_country):
                       legend_orientation='h',
                       xaxis_title='Timeline',
                       yaxis_title='Reported Counts',
-                      xaxis_range=[datetime.datetime(2020, 4, 10),
-                                   datetime.datetime(2020, 5, 20)],
                       yaxis=dict(autorange=True, fixedrange=False),
-                      xaxis_rangeslider_visible=True, xaxis_rangeslider_thickness=0.05,
+                      #   xaxis_rangeslider_visible=True, xaxis_rangeslider_thickness=0.05,
                       )
     fig.update_xaxes(
         rangeslider_visible=True,

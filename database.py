@@ -15,6 +15,9 @@ tuser = 'postgres'
 tpw = 'cyos94'
 database_url = 'postgres://vzcptenkjokmte:2c303f140cd5b887e5f0a3274e5e5db2c6a9d2a4e3825242550974193bf7c910@ec2-34-206-31-217.compute-1.amazonaws.com:5432/daa9tdg04a4o0v'
 
+dict_alpha_name = pd.read_csv('./data_rebase/country_alpha_index.csv',
+                              index_col='alpha2', keep_default_na=False, na_values=['__'], encoding='utf-8').to_dict('index')
+
 
 def sql_test_conn(local):
     try:
@@ -325,6 +328,80 @@ def sql_update_all_status(local):
             db_cursor.close()
             db_conn.close()
             print("PostgreSQL connection is closed")
+
+
+'''
+TODO: Since using client-based connection is too slow,
+I decided to use the country-timeline again
+'''
+
+
+def retrieve_country_timeline(country_alpha2):
+    """Function to retrieve timeline of a country from around jan 22
+    https://covid19-api.org/api/timeline/:country_alpha2
+    return list of dicts: from current date -> start date
+    --'country' : alpha2
+    --'last_update'
+    --'cases'
+    --'deaths'
+    --'recovered'
+    Arguments:
+        country_alpha2 {String-length=2} -- alpha2 of queried country
+    """
+    baseurl = mlcovid_url+'timeline/'+country_alpha2
+    data = datacollect.get_json(baseurl, {})
+    with open('./data_rebase/country-timeline/'+country_alpha2+'.csv', 'w', encoding='utf-8') as csv_file:
+        field_names = ['country', 'name', 'cases',
+                       'deaths', 'recovered', 'last_update']
+        writer = csv.DictWriter(
+            csv_file, fieldnames=field_names, extrasaction='ignore')
+        writer.writeheader()
+        for day in data[::-1]:
+            day['name'] = dict_alpha_name[day['country']]['name']
+            writer.writerow(day)
+    print('cluster timeline ' +
+          dict_alpha_name[country_alpha2]['name'] + ": OK")
+
+
+def retrieve_all_country_timeline():
+    for alpha2 in dict_alpha_name.keys():
+        retrieve_country_timeline(alpha2)
+        # print(alpha2)
+
+
+def get_quick_country_name(alpha):
+    return dict_alpha_name[alpha]['name']
+
+
+def get_quick_country_timeline(alpha):
+    """Retrieve country's data from 
+    a stored .csv 
+
+    Arguments:
+        alpha {str} -- country's alpha
+
+    Returns:
+        pandas.DF -- timeline df with country, name, cases, deaths, recovered, last_update
+        Dropped last row (current day) 
+    """
+    return pd.read_csv('./data_rebase/country-timeline/'+alpha+'.csv',
+                       keep_default_na=False, na_values=['__'], encoding='utf-8')[:-1]
+
+
+def get_country_live_status(alpha):
+    """Retrieve country status from API
+    https://covid19-api.org/api/status/:country
+    Arguments:
+        alpha str -- country alpha value
+
+    Returns:
+        cases, deaths, recovered - tuple of 3
+    """
+    baseurl = 'https://covid19-api.org/api/status/'+alpha
+    data = datacollect.get_json(baseurl, {})
+    return data['cases'], data['deaths'], data['recovered']
+
+# print(retrieve_all_country_timeline())
 
 
 # sql_update_all_status(False)
