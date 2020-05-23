@@ -1,12 +1,8 @@
-import visdcc
 import database
-import psycopg2
 import figure
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_bootstrap_components as dbc
-import os
 from dash.dependencies import Input, Output, State
 import controller
 from app import app

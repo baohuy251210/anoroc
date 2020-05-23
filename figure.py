@@ -1,10 +1,6 @@
 import pandas as pd
-import numpy as np
 from plotly.subplots import make_subplots
-import plotly.io as pio
-import plotly.express as px
 import plotly.graph_objects as go
-import datetime
 
 
 def fig_line_chart(value, df_country, checklist):
