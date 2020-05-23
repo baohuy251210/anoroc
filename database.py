@@ -7,7 +7,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 mlcovid_url = 'https://covid19-api.org/api/'
 
-
+# these were all outdated profiles :3
 thost = 'localhost'
 tport = '5432'
 tdbname = 'postgres'
@@ -17,6 +17,42 @@ database_url = 'postgres://vzcptenkjokmte:2c303f140cd5b887e5f0a3274e5e5db2c6a9d2
 
 dict_alpha_name = pd.read_csv('./data_rebase/country_alpha_index.csv',
                               index_col='alpha2', keep_default_na=False, na_values=['__'], encoding='utf-8').to_dict('index')
+
+
+def remake_country_alpha():
+    df = pd.read_csv('./data_rebase/country_all.csv',
+                     encoding='utf-8', keep_default_na=False, index_col='alpha-2', na_values=['__'])[['alpha-3']]
+    return df
+
+
+dict_alpha_23 = remake_country_alpha().to_dict('index')
+
+
+def csv_all_new_status():
+    """Retrieve current status ('cases','deaths', 'recovered', 'last_update','country':alpha2)
+    to make live table (live updated from jhu csse)
+    https://covid19-api.org/api/status
+    returns a list of dicts [{}, {},....]
+    each has country alpha2 and live status  
+    Returns:
+        [type] -- [description]
+    """
+    baseurl = mlcovid_url+'status'
+    data = datacollect.get_json(baseurl, {})
+    url_all_status = './data_rebase/country_all_status.csv'
+    with open(url_all_status, 'w', encoding='utf-8') as csv_file:
+        field_names = ['country', 'alpha-3', 'name', 'cases',
+                       'deaths', 'recovered', 'last_update']
+        writer = csv.DictWriter(
+            csv_file, fieldnames=field_names, extrasaction='ignore')
+        writer.writeheader()
+        for country in data:
+            country['name'] = dict_alpha_name[country['country']]['name']
+            if country['country'] in dict_alpha_23.keys():
+                country['alpha-3'] = dict_alpha_23[country['country']]['alpha-3']
+                writer.writerow(country)
+            else:
+                print('skipped: ', country['country'])
 
 
 def sql_test_conn(local):

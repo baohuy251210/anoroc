@@ -161,3 +161,29 @@ def fig_add_dropdown(fig):
     )
 
     return fig
+
+
+def fig_geo_map():
+    df = pd.read_csv('./data_rebase/country_all_status.csv',
+                     encoding='utf-8', keep_default_na=False, na_values=['__'])
+    # df['text'] = df['name']+'<br>' +\
+    # 'Infected: '+str(df['cases']) + '<br>' + 'Deaths: '+str(df['deaths']) + '<br>' +\
+    # 'Recovered: '+str(df['recovered'])
+    fig = go.Figure(data=go.Choropleth(
+        locations=df['alpha-3'],
+        z=df['cases'],
+        locationmode='ISO-3',
+        colorscale='Picnic',
+        # autocolorscale=False,
+        colorbar_title="Confirmed Infected"
+    )
+    )
+    fig.update_layout(autosize=True,
+                      geo=dict(
+                          showframe=False,
+                          showcoastlines=False,
+                          projection_type='natural earth'
+                      ),
+                      margin=dict(t=5, b=5, l=0, r=0)
+                      )
+    return fig

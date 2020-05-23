@@ -225,3 +225,13 @@ def generate_timeline_graph(btn_clicks, alpha, checklist):
         return html.Span(className='label label-error', children="Please choose at least one type")
     else:
         return generate_country_charts(alpha, checklist)
+
+
+@app.callback(
+    Output('geomap-loader', 'children'),
+    [Input('btn-geomap', 'n_clicks')]
+)
+def generate_geomap(n_clicks):
+    fig = figure.fig_geo_map()
+    return dcc.Graph(figure=fig, style={'width': '100%', 'height': '100%',
+                                        'fontFamily': 'Roboto Mono', })

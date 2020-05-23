@@ -22,6 +22,8 @@ data_updated_time = 'version test1'
 '''
 ---------------
 Web DESIGN:
+Page 1:
+-----------
 '''
 page_header = html.Div(className='columns bg-gray', children=[
     html.Div(className='column col-12', children=[
@@ -51,53 +53,6 @@ page_header = html.Div(className='columns bg-gray', children=[
         ], style={'fontWeight': '600', 'paddingLeft': '50px', 'paddingRight': '50px'})  # navbar style
     ])
 ])
-
-
-column_select = html.Div(id='dropdown-input-container', className='card', children=[
-    html.Div(className='card-header', children=[
-        html.Div('COVID Data Explorer', className='card-title h3 text-left'),
-        html.Div("Watch the trends",
-                 className='card-subtitle text-gray text-left'),
-    ]),
-    html.Div(className='card-body m-2', children=[
-        html.Div(className='h6', children='Select country:'),
-        controller.generate_dropdown(),
-        html.Button('Watch', className='btn btn-secondary m-2',
-                    id='country-dropdown-watch'),
-        html.Div(className='divider'),
-        html.Div(className='h6', children='Select status type(s):'),
-        dcc.Checklist(id='show-checklist',
-                      options=[
-                          {'label': ' Show Infected ', 'value': 'infected'},
-                          {'label': ' Show Deaths ', 'value': 'deaths'},
-                          {'label': ' Show Recovered ', 'value': 'recovered'}
-                      ],
-                      value=['infected', 'deaths', 'recovered'],
-                      #   className='form-group',
-                      labelStyle={'display': 'block',
-                                  'marginBottom': '.4rem'},
-
-                      )
-    ]),
-    html.Div(className='card-footer m-2', children=[
-        html.Button('Submit', className='btn btn-primary',
-                    id='country-dropdown-submit')
-    ])
-])
-
-column_data = \
-    html.Div(className='column col-12 col-mx-auto', children=[
-        html.Div(id='dropdown-output-container', className='card text-dark d-invisible', children=[
-
-            html.Div(id='dropdown-output-header', className='card-header h3', children=[
-            ]),
-
-            html.Div(id='dropdown-output-body', className='card-body', children=[
-            ])
-        ])
-    ])
-
-
 div_hero =\
     html.Div(id='hero-container', className='hero bg-gray section', children=[
                 html.H2('Anoroc Explorer', style={'marginBottom': '30px'}),
@@ -165,6 +120,55 @@ div_introduction =\
 
     ])
 
+'''
+Web Design:
+Page 2:
+'''
+
+column_select = html.Div(id='dropdown-input-container', className='card', children=[
+    html.Div(className='card-header', children=[
+        html.Div('COVID Data Explorer', className='card-title h3 text-left'),
+        html.Div("Watch the trends",
+                 className='card-subtitle text-gray text-left'),
+    ]),
+    html.Div(className='card-body m-2', children=[
+        html.Div(className='h6', children='Select country:'),
+        controller.generate_dropdown(),
+        html.Button('Watch', className='btn btn-secondary m-2',
+                    id='country-dropdown-watch'),
+        html.Div(className='divider'),
+        html.Div(className='h6', children='Select status type(s):'),
+        dcc.Checklist(id='show-checklist',
+                      options=[
+                          {'label': ' Show Infected ', 'value': 'infected'},
+                          {'label': ' Show Deaths ', 'value': 'deaths'},
+                          {'label': ' Show Recovered ', 'value': 'recovered'}
+                      ],
+                      value=['infected', 'deaths', 'recovered'],
+                      #   className='form-group',
+                      labelStyle={'display': 'block',
+                                  'marginBottom': '.4rem'},
+
+                      )
+    ]),
+    html.Div(className='card-footer m-2', children=[
+        html.Button('Submit', className='btn btn-primary',
+                    id='country-dropdown-submit')
+    ])
+])
+
+column_data = \
+    html.Div(className='column col-12 col-mx-auto', children=[
+        html.Div(id='dropdown-output-container', className='card text-dark d-invisible', children=[
+
+            html.Div(id='dropdown-output-header', className='card-header h3', children=[
+            ]),
+
+            html.Div(id='dropdown-output-body', className='card-body', children=[
+            ])
+        ])
+    ])
+
 
 def html_div_select_country(column1, column2):
     return html.Div(className='columns m-2 py-2', children=[
@@ -177,6 +181,30 @@ def html_div_select_country(column1, column2):
     ])
 
 
+html_geo_map = html.Div(className='section bg-gray text-center', children=[
+    html.Div(className='columns', children=[
+        html.Div(className='column col-4 col-mx-auto', children=[
+            html.H2("COVID-19 World Map", className='h2 text-dark'),
+        ]),
+        html.Button(id='btn-geomap', className='btn btn-secondary btn-lg mr-2 d-invisible',
+                    children="COVID-19 World Map"),
+    ]),
+    html.Div(className='columns', children=[
+        html.Div(className='column col-11 col-mx-auto', children=[
+            html.Div(id='dropdown-output-container', className='card text-dark', children=[
+                dcc.Loading(id='geomap-loader', type='circle', color='#5755d9', children=[
+                ])
+            ]),
+
+        ])
+    ])
+])
+
+
+def gen_divider_hor():
+    return html.Div(className='divider', children=[''])
+
+
 """
 -----------------------
 App.py layouts part
@@ -184,7 +212,7 @@ App.py layouts part
 page_home_layout = html.Div([div_hero, div_introduction])
 
 page_country_select = html.Div(className='section bg-gray', children=[
-                               html_div_select_country(column_select, column_data)], style={'borderBottom': '30px'})
+                               html_div_select_country(column_select, column_data), gen_divider_hor(), html_geo_map], style={'borderBottom': '30px'})
 
 
 app.layout = \
