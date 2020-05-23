@@ -193,9 +193,8 @@ def fig_geo_map(status):
     )
     fig.update_layout(autosize=True,
                       geo=dict(
-                          showframe=False,
-                          showcoastlines=False,
-                          projection_type='natural earth'
+                          showframe=True,
+                          projection_type='eckert4'
                       ),
                       margin=dict(t=15, b=5, l=5, r=5),
                       template='plotly',
