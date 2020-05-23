@@ -1,2 +1,1 @@
-web: gunicorn app:server
-clock: python clock.py
+web: gunicorn index:server
