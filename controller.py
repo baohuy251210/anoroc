@@ -163,11 +163,36 @@ def generate_timeline_graph(btn_clicks, alpha, checklist):
         return generate_country_charts(alpha, checklist)
 
 
+tabs_last = [0, 0, 0]
+
+
 @app.callback(
-    Output('geomap-loader', 'children'),
-    [Input('btn-geomap', 'n_clicks')]
+    [Output('tab-cases', 'className'),
+     Output('tab-deaths', 'className'),
+     Output('tab-recovered', 'className'),
+     Output('geomap-loader', 'children')],
+    [Input('geo-cases', 'n_clicks'),
+     Input('geo-deaths', 'n_clicks'),
+     Input('geo-recovered', 'n_clicks')]
 )
-def generate_geomap(n_clicks):
-    fig = figure.fig_geo_map()
+def geo_tabs_cases(c_btn, d_btn, r_btn):
+    tab = 'tab-item'
+    tab_active = 'tab-item active'
+    tabs_cur = [int(c_btn), int(d_btn), int(r_btn)]
+    global tabs_last
+    clicked = [tabs_cur[i]-tabs_last[i] for i in range(3)]
+    tabs_last = tabs_cur
+    if clicked[0]:
+        return tab_active, tab, tab, generate_geomap('cases')
+    elif clicked[1]:
+        return tab, tab_active, tab, generate_geomap('deaths')
+    elif clicked[2]:
+        return tab, tab, tab_active, generate_geomap('recovered')
+    else:
+        return tab, tab, tab, generate_geomap('cases')
+
+
+def generate_geomap(status):
+    fig = figure.fig_geo_map(status)
     return dcc.Graph(figure=fig, style={'width': '100%', 'height': '100%',
                                         'fontFamily': 'Roboto Mono', })

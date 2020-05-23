@@ -177,21 +177,42 @@ def html_div_select_country(column1, column2):
     ])
 
 
-html_geo_map = html.Div(className='section bg-gray text-center', children=[
+html_geo_map = html.Div(className='section text-center', children=[
     html.Div(className='columns', children=[
-        html.Div(className='column col-4 col-mx-auto', children=[
-            html.H2("COVID-19 World Map", className='h2 text-dark'),
-        ]),
-        html.Button(id='btn-geomap', className='btn btn-secondary btn-lg mr-2 d-invisible',
-                    children="COVID-19 World Map"),
-    ]),
-    html.Div(className='columns', children=[
-        html.Div(className='column col-11 col-mx-auto', children=[
-            html.Div(id='geomap-output-container', className='card text-dark', children=[
-                dcc.Loading(id='geomap-loader', type='circle', color='#5755d9', children=[
-                ])
-            ]),
-
+        html.Div(className='column col-11 col-xs-12 col-mx-auto', children=[
+            html.Div(className='panel', children=[
+                html.Div(className='panel-header text-center',
+                         children=[
+                             html.Div(className='panel-title h2 mt-10', children=[
+                                 "Observe World Maps"
+                             ])
+                         ]),
+                html.Div(className='panel-nav', children=[
+                    html.Ul(className='tab tab-block', children=[
+                        html.Li(id='tab-cases', className='tab-item active', children=[
+                            html.A(id='geo-cases',
+                                   children="By Infected", className='a', n_clicks=1)
+                        ]),
+                        html.Li(id='tab-deaths', className='tab-item', children=[
+                            html.A(id='geo-deaths', n_clicks=0,
+                                   children="by Deceased")
+                        ]),
+                        html.Li(id='tab-recovered', className='tab-item', children=[
+                            html.A(id='geo-recovered', n_clicks=0,
+                                   children="by Recovered")
+                        ])
+                    ])
+                ]),
+                html.Div(className='panel-body', children=[
+                    html.Div(id='geomap-output-container', className='card text-dark', children=[
+                        dcc.Loading(id='geomap-loader', type='circle', color='#5755d9', children=[
+                            # GEO MAP INFO---
+                        ], style={'height': '15rem'})
+                    ])
+                ]),
+                html.Div(className='panel-footer',
+                         children="That's it for now :)")
+            ], style={'backgroundColor': '#ffffff', 'border': '0', 'margin': '10px'})
         ])
     ])
 ])

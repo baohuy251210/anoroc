@@ -19,7 +19,9 @@ dict_alpha_23 = remake_country_alpha().to_dict('index')
 
 
 def csv_all_new_status():
-    """Retrieve current status ('cases','deaths', 'recovered', 'last_update','country':alpha2)
+    """
+    UPDATE FUNCTION DAILY csv storing all current status
+    Retrieve current status ('cases','deaths', 'recovered', 'last_update','country':alpha2)
     to make live table (live updated from jhu csse)
     https://covid19-api.org/api/status
     returns a list of dicts [{}, {},....]
@@ -102,6 +104,9 @@ def retrieve_country_timeline(country_alpha2):
 
 
 def retrieve_all_country_timeline():
+    """UPDATE function:
+    retrieve country updated timeline into csvs
+    """
     for alpha2 in dict_alpha_name.keys():
         retrieve_country_timeline(alpha2)
         # print(alpha2)

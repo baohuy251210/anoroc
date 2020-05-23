@@ -159,19 +159,36 @@ def fig_add_dropdown(fig):
     return fig
 
 
-def fig_geo_map():
+def fig_geo_map(status):
+    """Generate a world map based on given case status:
+    'cases','deaths','recovered
+
+    Arguments:
+        status {[type]} -- [description]
+
+    Returns:
+        [type] -- [description]
+    """
     df = pd.read_csv('./data_rebase/country_all_status.csv',
                      encoding='utf-8', keep_default_na=False, na_values=['__'])
     # df['text'] = df['name']+'<br>' +\
     # 'Infected: '+str(df['cases']) + '<br>' + 'Deaths: '+str(df['deaths']) + '<br>' +\
     # 'Recovered: '+str(df['recovered'])
+    if (status == 'cases'):
+        color_mode = 'sunset'
+    elif(status == 'deaths'):
+        color_mode = 'reds'
+    else:
+        color_mode = 'greens'
     fig = go.Figure(data=go.Choropleth(
         locations=df['alpha-3'],
-        z=df['cases'],
+        z=df[status],
         locationmode='ISO-3',
-        colorscale='Picnic',
-        # autocolorscale=False,
-        colorbar_title="Confirmed Infected"
+        colorscale=color_mode,
+        # autocolorscale=True,
+        colorbar_title="Confirmed Cases",
+        # text=df['cases']
+        # color_continuous_scale='Inferno'
     )
     )
     fig.update_layout(autosize=True,
@@ -180,6 +197,20 @@ def fig_geo_map():
                           showcoastlines=False,
                           projection_type='natural earth'
                       ),
-                      margin=dict(t=5, b=5, l=0, r=0)
+                      margin=dict(t=15, b=5, l=5, r=5),
+                      template='plotly',
+                      font=dict(
+                          family='Roboto Slab, serif',
+                          size=14,
+                          color="#000000"
+                      ),
                       )
+    fig.update_geos(
+        showcoastlines=True, coastlinecolor="RebeccaPurple",
+        showland=True, landcolor="LightGreen",
+        showocean=True, oceancolor="LightBlue",
+        showlakes=True, lakecolor="LightBlue",
+        showrivers=False, rivercolor="LightBlue",
+        showcountries=True
+    )
     return fig
