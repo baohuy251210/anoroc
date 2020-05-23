@@ -176,10 +176,13 @@ def fig_geo_map(status):
     # 'Recovered: '+str(df['recovered'])
     if (status == 'cases'):
         color_mode = 'sunset'
+        color_h = 'blue'
     elif(status == 'deaths'):
         color_mode = 'reds'
+        color_h = 'red'
     else:
         color_mode = 'greens'
+        color_h = 'green'
     fig = go.Figure(data=go.Choropleth(
         locations=df['alpha-3'],
         z=df[status],
@@ -194,15 +197,20 @@ def fig_geo_map(status):
     fig.update_layout(autosize=True,
                       geo=dict(
                           showframe=True,
-                          projection_type='eckert4'
+                          projection_type='kavrayskiy7'
                       ),
-                      margin=dict(t=15, b=5, l=5, r=5),
+                      margin=dict(t=2, b=2, l=2, r=2),
                       template='plotly',
                       font=dict(
                           family='Roboto Slab, serif',
                           size=14,
                           color="#000000"
                       ),
+                      hoverlabel=dict(
+                          bgcolor=color_h,
+                          font_size=12,
+                          font_family="Roboto Slab"
+                      )
                       )
     fig.update_geos(
         showcoastlines=True, coastlinecolor="RebeccaPurple",
@@ -210,6 +218,6 @@ def fig_geo_map(status):
         showocean=True, oceancolor="LightBlue",
         showlakes=True, lakecolor="LightBlue",
         showrivers=False, rivercolor="LightBlue",
-        showcountries=True
+        showcountries=True,
     )
     return fig

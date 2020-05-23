@@ -107,7 +107,7 @@ def generate_card_body(status):
             ]),
             html.Div(className='divider-vert'),
             html.Div(className='column col-3 col-mx-auto', children=[
-                html.Span(className='label label-primary', children=[
+                html.Span(className='label label-error', children=[
                     "Deceased:"
                 ]),
                 html.Span(className='label label-secondary', children=[
@@ -116,7 +116,7 @@ def generate_card_body(status):
             ]),
             html.Div(className='divider-vert'),
             html.Div(className='column col-3 col-mx-auto', children=[
-                html.Span(className='label label-primary', children=[
+                html.Span(className='label label-success', children=[
                     "Recovered:"
                 ]),
                 html.Span(className='label label-secondary', children=[
