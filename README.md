@@ -1,4 +1,4 @@
-#  [Anoroc](https:%5C%5Canoroc.herokuapp.com) COVID-19 Explorer :fire:
+#  [Anoroc](anoroc.herokuapp.com) COVID-19 Explorer :fire:
 * Just my simple web Dash application made with Python cuz I wanted to learn Python developing :)
 * Pretty much what I have right now is on ```anoroc.herokuapp.com```
 ***hmm I'm not planning to work on this anymore but to focus on other stuffs like CP and AI, new features will come in hopefully once in a while***
