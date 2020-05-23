@@ -65,7 +65,9 @@ def country_select(submit_clicks, watch_clicks, alpha, checklist, card_class):
         return str(card_class), None, None
     status = database.get_country_live_status(alpha)
     card_body_div = generate_card_body(status)
-    return [str(card_class).replace(' d-invisible', ' d-visible'), dict_alpha_name[alpha]['name'], card_body_div]
+    new_class = str(card_class).replace(' d-invisible', ' d-visible')
+    print(str(new_class))
+    return [new_class, dict_alpha_name[alpha]['name'], card_body_div]
 
 # @app.callback(
 #     Output('dropdown-output', 'children'),

@@ -191,7 +191,7 @@ html_geo_map = html.Div(className='section bg-gray text-center', children=[
     ]),
     html.Div(className='columns', children=[
         html.Div(className='column col-11 col-mx-auto', children=[
-            html.Div(id='dropdown-output-container', className='card text-dark', children=[
+            html.Div(id='geomap-output-container', className='card text-dark', children=[
                 dcc.Loading(id='geomap-loader', type='circle', color='#5755d9', children=[
                 ])
             ]),
