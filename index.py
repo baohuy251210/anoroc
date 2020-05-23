@@ -38,7 +38,6 @@ page_header = html.Div(className='columns bg-gray', children=[
                     html.Img(
                         src='/assets/logo-brand.png', style={'height': '50px'})
                 ])
-
             ]),
             html.Section(className='navbar-section', children=[
                 html.A(
@@ -50,20 +49,6 @@ page_header = html.Div(className='columns bg-gray', children=[
 
             ])
         ], style={'fontWeight': '600', 'paddingLeft': '50px', 'paddingRight': '50px'})  # navbar style
-    ])
-])
-page_modal_news = html.Div(id='modal-main', className='modal modal-sm active', children=[
-    html.Div(id='modal-container', className='modal-container', children=[
-        html.Div(className='modal-header', children=[
-            html.A(id='modal-news-close', href='#',
-                   className='btn btn-clear float-right'),
-            html.Div(className='modal-title h5',
-                     children=['Welcome to Anoroc Explorer 1.0'])
-        ]),
-        html.Div(className='modal-body', children=[
-            html.Div(className='content', children=[
-                "Check out new contents and supports via my Github"])
-        ])
     ])
 ])
 
@@ -170,12 +155,18 @@ div_introduction =\
                         className='card-body', children='To provide the best experiences, Anoroc prioritizes lightweight data loads')
                 ], style={'padding': '0.5rem', 'border': '0'})
             ])
-        ], style={'marginLeft': '50px', 'marginRight': '50px'})
+        ], style={'marginLeft': '50px', 'marginRight': '50px', 'marginBottom': '50px'}),
+        html.Div(className='columns', children=[
+            html.Div(className='column col-5 col-lg-12 col-mx-auto', children=[
+                html.A(id='btn-start-2', className='h1 btn btn-secondary btn-lg mr-2',
+                       href='#selector', children="Start Explore"),
+            ])
+        ])
+
     ])
 
 
 def html_div_select_country(column1, column2):
-    print('select')
     return html.Div(className='columns m-2 py-2', children=[
         html.Div(className='column col-4', children=[
             column1,
@@ -192,8 +183,10 @@ App.py layouts part
 """
 page_home_layout = html.Div([div_hero, div_introduction])
 
-page_country_select = html.Div(
-    [html_div_select_country(column_select, column_data)], style={'borderBottom': '30px'})
+page_country_select = html.Div(className='section bg-gray', children=[
+                               html_div_select_country(column_select, column_data)], style={'borderBottom': '30px'})
+
+
 app.layout = \
     html.Div(id='app-layout', className='bg-gray',
              children=[page_header,

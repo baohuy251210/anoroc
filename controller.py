@@ -190,7 +190,7 @@ def generate_card_body(status):
         ]),
         html.Div(className='divider'),
         html.Button(id='graph-btn-timeline', className='btn btn-primary', children=[
-            'Timeline'
+            'Show Timeline'
         ]),
         html.Div(className='columns', children=[  # charts
             html.Div(className='column col-12', children=[
