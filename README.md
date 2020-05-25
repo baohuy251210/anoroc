@@ -1,7 +1,9 @@
 #  [Anoroc](http://anoroc.herokuapp.com/) COVID-19 Explorer :fire:
+***Data will not be updated daily anymore since I'm focusing on other stuffs :"> ***
 * Just my simple web Dash application made with Python cuz I wanted to learn Python developing :)
 * Pretty much what I have right now is on ```anoroc.herokuapp.com```
 ***hmm I'm not planning to work on this anymore but to focus on other stuffs like CP and AI, new features will come in hopefully once in a while***
+
 ## Version 1.0 Released (5/23): :clap:
 
  ##### After them heavy days working on this, here comes the Jumbo Lumbo patch   :boom:
